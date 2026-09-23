@@ -25,22 +25,19 @@
 <section class="screen active" id="screen-auth">
   <div class="mist-wrap">
     <div class="auth-card">
-      <p class="eyebrow">Речное племя · событие</p>
-      <h1 class="display screen-title">Сквозь туман</h1>
-      <p class="lore-text">Туман внезапно окутывает лагерь, и начинают происходить странные вещи. Кто-то не замечает ничего и спокойно спит в своём логове. А кого-то на охоте у Галечного берега хватают за лапы и тащат на глубину.</p>
-      <p class="lore-text muted">Назовись, прежде чем вступить во тьму.</p>
+      <p class="eyebrow">Речное племя · мероприятие</p>
+      <h1 class="display screen-title">Тайны туманных заводей</h1>
       <div class="field">
         <label>Имя персонажа</label>
-        <input type="text" id="inputName" placeholder="Как к тебе обращаться">
+        <input type="text" id="inputName" placeholder=" ">
       </div>
       <div class="field">
         <label>ID персонажа</label>
-        <input type="text" id="inputId" placeholder="Например, 1707227">
-        <p class="field-hint">По ID тебя узнают в следующий раз — заходи с тем же именем и ID, чтобы вернуться к своему прогрессу.</p>
+        <input type="text" id="inputId" placeholder=" ">
+<p class="field-hint">Вышел? Заходи с тем же именем и ID</p>
+<p class="err-text" id="authErr">Заполни имя и ID, прежде чем вступить во тьму.</p>
       </div>
-      <p class="err-text" id="authErr">Заполни имя и ID, прежде чем вступить во тьму.</p>
-      <button class="btn btn-primary" id="btnStartAuth">Вступить во тьму</button>
-      <p class="hint-small" id="dataSourceHint">Прототип: данные хранятся в этом браузере (localStorage).</p>
+      <button class="btn btn-primary" id="btnStartAuth">Проснуться?</button>
     </div>
   </div>
 </section>
@@ -51,10 +48,7 @@
       <p class="eyebrow">Видение тумана</p>
       <h2 class="display screen-title" id="greetName">Туман знает твоё имя</h2>
       <p class="lore-text">
-        Пройди через пять видений — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong>
-        или хитрый на язык <strong>Кудесник</strong>. Путь выбираешь не ты — решает то, как ты поведёшь себя в тумане.
-        Во время самого теста персонаж ещё не знает, что умеет и к какой команде тяготеет — просто замечай и реагируй.
-      </p>
+        Пройди через пять видений — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong> или хитрый <strong>Кудесник</strong>.</p>
       <div class="btn-row">
         <button class="btn btn-primary" id="btnStartTest">Войти в видения</button>
       </div>
@@ -120,7 +114,7 @@
       <path d="M0,14 C120,4 200,24 340,14 C480,4 560,24 700,14 C840,4 920,24 1000,14 L1000,24 L0,24 Z" fill="none" stroke="var(--river-line)" stroke-width="1.5"/>
     </svg>
     <div class="header-inner">
-      <p class="eyebrow">Речное племя · сквозь туман</p>
+      <p class="eyebrow">Речное племя · Тайны туманных заводей</p>
       <h1 class="title display">Тропа <span id="dashName">—</span></h1>
       <div class="profile-row" id="profileRow">
         <div class="chip chip-gold" id="chipPath">Путь: —</div>
