@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Сквозь туман — Речное племя</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=PT+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0b1112;
+  --bg-panel: #111a1c;
+  --bg-panel-2: #162225;
+  --bg-card: #0e1618;
+  --bg-content: #0d1517;
+  --moss: #6b9383;
+  --moss-dim: #436357;
+  --gold: #c2a878;
+  --gold-soft: rgba(194, 168, 120, 0.16);
+  --gold-dim: rgba(194, 168, 120, 0.06);
+  --mist: #aebdbd;
+  --mist-soft: rgba(174, 189, 189, 0.14);
+  --mist-dim: rgba(174, 189, 189, 0.05);
+  --river-line: rgba(194, 168, 120, 0.35);
+  --driftwood: #9a8a76;
+  --text: #d4e0de;
+  --text-muted: #798c89;
+  --border: #223336;
+  --border-light: #31474a;
+  --radius: 0px;
+  --err: #c07a6c;
+  --pending: #6b9383;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); border-left: 1px solid var(--border); }
+::-webkit-scrollbar-thumb { background: var(--border-light); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'PT Serif', serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  position: relative;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(107,147,131,0.07), transparent 42%),
+    radial-gradient(circle at 88% 36%, rgba(194,168,120,0.04), transparent 42%),
+    radial-gradient(circle at 50% 100%, rgba(174,189,189,0.05), transparent 55%);
+}
+.vignette {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, transparent 45%, rgba(6,9,10,0.55) 100%);
+}
+h1, h2, h3, .display { font-family: 'Cormorant Garamond', serif; font-weight: 400; }
+.mono { font-family: 'PT Mono', monospace; }
+a { color: inherit; transition: opacity .2s; }
+.firefly { position: fixed; width: 2px; height: 2px; background: var(--gold); opacity: 0; animation: drift 11s ease-in-out infinite; pointer-events: none; z-index: 0; box-shadow: 0 0 6px 1px rgba(194,168,120,0.6); }
+.gf1 { top: 20%; left: 75%; animation-delay: 0s; }
+.gf2 { top: 60%; left: 85%; animation-delay: 2.5s; }
+.gf3 { top: 35%; left: 92%; animation-delay: 5s; }
+.gf4 { top: 75%; left: 65%; animation-delay: 7.5s; }
+.gf5 { top: 12%; left: 8%; animation-delay: 3.8s; }
+.gf6 { top: 82%; left: 22%; animation-delay: 6.2s; }
+@keyframes drift { 0%{opacity:0;transform:translate(0,0);} 50%{opacity:.55;transform:translate(-15px,-22px);} 100%{opacity:0;transform:translate(-5px,-42px);} }
+.fog-layer { position: fixed; top: -25%; left: -25%; width: 150%; height: 150%; pointer-events: none; z-index: 0; filter: blur(34px); mix-blend-mode: screen; }
+.fog-1 { background: radial-gradient(ellipse 55% 35% at 20% 30%, rgba(215,226,224,0.055), transparent 70%); animation: fogDrift1 58s ease-in-out infinite; opacity: .85; }
+.fog-2 { background: radial-gradient(ellipse 45% 30% at 80% 65%, rgba(194,168,120,0.05), transparent 70%); animation: fogDrift2 74s ease-in-out infinite; opacity: .7; }
+.fog-3 { background: radial-gradient(ellipse 60% 40% at 55% 90%, rgba(107,147,131,0.065), transparent 70%); animation: fogDrift3 88s ease-in-out infinite; opacity: .6; }
+.fog-4 { background: radial-gradient(ellipse 65% 45% at 50% 40%, rgba(180,192,192,0.055), transparent 72%); animation: fogDrift2 63s ease-in-out infinite reverse; opacity: .55; }
+.fog-5 { background: radial-gradient(ellipse 50% 55% at 30% 75%, rgba(174,189,189,0.05), transparent 68%); animation: fogDrift3 96s ease-in-out infinite reverse; opacity: .5; }
+.fog-6 { background: radial-gradient(ellipse 40% 60% at 70% 10%, rgba(194,168,120,0.04), transparent 66%); animation: fogDrift1 80s ease-in-out infinite reverse; opacity: .45; }
+@keyframes fogDrift1 { 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(6%,4%) scale(1.09); } }
+@keyframes fogDrift2 { 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(-7%,-5%) scale(1.11); } }
+@keyframes fogDrift3 { 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(-4%,6%) scale(1.07); } }
+#screen-story .fog-4 { opacity: .95; }
+.fog-texture { position: fixed; inset: -10%; z-index: 1; pointer-events: none; opacity: .05; mix-blend-mode: screen; }
+@media (prefers-reduced-motion: reduce) {
+  .fog-layer, .firefly, .fog-texture, .state-approved, .task-node-card, .card-reveal-burst { animation: none !important; }
+}
+.screen { display: none; min-height: 100vh; position: relative; z-index: 2; }
+.screen.active { display: block; animation: fadeIn .5s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+.mist-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px 16px; position: relative; z-index: 2; }
+.auth-card { width: 100%; max-width: 440px; background: var(--bg-panel); border: 1px solid var(--border); padding: 36px 30px; position: relative; box-shadow: 0 30px 70px -30px rgba(0,0,0,0.7); }
+.auth-card.wide { max-width: 1100px; }
+.auth-card.medium { max-width: 700px; }
+.auth-card.snug { max-width: 700px; }
+.auth-card::before { content:""; position:absolute; left:0; top:0; height:2px; width:64px; background: linear-gradient(90deg, var(--gold), transparent); }
+.auth-card::after {
+  content:""; position:absolute; inset:-1px; z-index:-1; pointer-events:none;
+  background: radial-gradient(ellipse 90% 40% at 50% -10%, rgba(174,189,189,0.08), transparent 70%);
+  filter: blur(10px);
+}
+.eyebrow { font-family:'PT Mono',monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--moss); margin:0 0 12px; }
+.screen-title { font-size: 32px; color: var(--gold); margin: 0 0 16px; letter-spacing:.01em; }
+.lore-text { font-size: 14.5px; color: var(--text); line-height: 1.7; margin: 0 0 18px; }
+.lore-text.muted { color: var(--text-muted); font-size: 13.5px; }
+.field { margin-bottom: 18px; }
+.field label { display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--moss); margin-bottom:6px; }
+.field input, .field textarea { width:100%; background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text); font-family:'PT Serif',serif; font-size:16px; padding:12px 12px; }
+.field input:focus, .field textarea:focus, textarea:focus { outline:none; border-color:var(--gold-soft); }
+.field-hint { font-size:11px; color:var(--driftwood); margin-top:6px; font-style:italic; }
+.err-text { font-size:12.5px; color:var(--err); margin:-8px 0 14px; display:none; }
+.err-text.show { display:block; }
+.btn { font-family:'PT Serif',serif; font-size:15px; padding:13px 18px; cursor:pointer; border:1px solid var(--border); transition:.2s; background:transparent; color:var(--text); -webkit-tap-highlight-color: transparent; }
+.btn-primary { background: var(--gold); color: var(--bg-deep); border-color: var(--gold); font-weight:700; width:100%; }
+.btn-primary:hover { opacity:.9; }
+.btn-primary:active { transform: scale(.98); }
+.btn-primary:disabled { opacity:.4; cursor:default; }
+.btn-ghost { background:transparent; color:var(--text-muted); width:100%; border-color:var(--border); }
+.btn-ghost:hover { border-color:var(--gold-soft); color:var(--text); }
+.btn-row { display:flex; flex-direction:column; gap:10px; margin-top:22px; }
+.hint-small { font-size:11px; color:var(--driftwood); margin-top:14px; text-align:center; font-style:italic; }
+.test-progress { margin-bottom: 26px; }
+.test-progress-label { display:flex; justify-content:space-between; font-size:10px; font-family:'PT Mono',monospace; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted); margin-bottom:8px; }
+.river-track { height:2px; background:var(--border); position:relative; }
+.river-fill { position:absolute; inset:0; width:0%; background:var(--gold); transition:width .5s ease; }
+.question-text { font-size: 22px; color: var(--text); margin: 0 0 22px; line-height: 1.4; }
+.option-list { display:flex; flex-direction:column; gap:10px; }
+.option-item { background:var(--bg-panel-2); border:1px solid var(--border); padding:15px 16px; cursor:pointer; font-size:14.5px; color:var(--text); transition:.2s; position:relative; overflow:hidden; -webkit-tap-highlight-color: transparent; }
+.option-item::before { content:""; position:absolute; inset:0; background: radial-gradient(circle at 0% 50%, rgba(174,189,189,0.1), transparent 60%); opacity:0; transition:.25s; }
+.option-item:hover { border-color:var(--gold-soft); background:var(--bg-card); transform:translateX(3px); }
+.option-item:active { border-color:var(--gold-soft); background:var(--bg-card); transform: scale(.98); }
+.option-item:hover::before { opacity:1; }
+.result-banner { display:flex; align-items:center; gap:18px; background:rgba(194,168,120,0.08); border:1px solid var(--gold-soft); padding:18px 20px; }
+.result-icon { font-size:28px; color:var(--gold); flex-shrink:0; width:54px; height:54px; display:flex; align-items:center; justify-content:center; background:var(--bg-panel-2); border:1px solid var(--gold-soft); }
+.result-path { font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--gold); }
+.result-buff { font-size:12.5px; color:var(--text-muted); margin-top:4px; }
+.wake-prompt { text-align: center; cursor: pointer; padding: 20px; }
+.wake-prompt .screen-title { margin-bottom: 22px; }
+.wake-hint {
+  display: inline-block; font-family: 'PT Mono', monospace; font-size: 11px; letter-spacing: .25em;
+  text-transform: uppercase; color: var(--gold); opacity: .55; border-bottom: 1px solid var(--gold-soft);
+  padding-bottom: 4px; animation: wakePulse 2.6s ease-in-out infinite; transition: opacity .2s, color .2s;
+}
+.wake-prompt:hover .wake-hint { opacity: 1; color: var(--gold); }
+@keyframes wakePulse { 0%,100%{ opacity:.35; } 50%{ opacity:.85; } }
+.story-card { cursor: pointer; }
+.story-next { display: block; text-align: right; margin-top: 6px; }
+.story-eyebrow { font-family:'PT Mono',monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--moss); margin:0 0 18px; opacity:.8; }
+#storyText { font-size: 16px; }
+#storyText.emphasis {
+  font-family: 'Cormorant Garamond', serif; font-size: 30px; font-style: italic; letter-spacing: .01em;
+  color: var(--text); text-align: center; position: relative; z-index: 1; text-shadow: 0 0 26px rgba(212,224,222,0.3);
+}
+#storyText.emphasis::before {
+  content: ""; position: absolute; inset: -46px -70px; z-index: -1;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(212,224,222,0.14), transparent 72%); filter: blur(22px);
+}
+.story-icon { display:none; }
+.story-icon.show {
+  display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; margin: 0 auto 20px;
+  font-size: 30px; color: var(--gold); background: radial-gradient(circle at 35% 30%, rgba(194,168,120,0.18), var(--bg-panel-2));
+  border: 1px solid var(--gold-soft); border-radius: 50%;
+  box-shadow: 0 0 0 5px rgba(194,168,120,0.06), 0 0 26px -6px rgba(194,168,120,0.55); animation: revealPop .7s ease;
+}
+@keyframes revealPop { 0%{ opacity:0; transform: scale(.5); } 60%{ transform: scale(1.08); } 100%{ opacity:1; transform: scale(1); } }
+.mask-icon { width: 60%; height: 60%; color: inherit; }
+.result-icon svg, .story-icon svg { width: 60%; height: 60%; color: inherit; }
+#storyText.reveal { text-align: center; white-space: pre-line; font-size: 15px; padding-top: 4px; border-top: 1px solid var(--gold-soft); }
+header { padding: 32px 16px 20px; position: relative; background: var(--bg-deep); border-bottom: 1px solid var(--border); z-index: 10; overflow: hidden; }
+header::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 60% 100% at 85% 0%, rgba(174,189,189,0.06), transparent 60%); }
+.river-svg { position:absolute; left:0; right:0; bottom:-2px; height:18px; width:100%; opacity:.3; pointer-events:none; }
+.header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+.title { font-size: 28px; margin: 0 0 14px; color: var(--gold); }
+.profile-row { display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; align-items:center; margin-bottom: 20px; padding-bottom:2px; scrollbar-width:none; }
+.profile-row::-webkit-scrollbar { display:none; }
+.chip { font-family:'PT Mono',monospace; font-size:10.5px; letter-spacing:.05em; color:var(--text-muted); border:1px solid var(--border); padding:6px 11px; background:var(--bg-panel-2); white-space:nowrap; flex-shrink:0; }
+.chip-gold { color:var(--gold); border-color:var(--gold-soft); background:rgba(194,168,120,.1); }
+.chip-btn { cursor:pointer; transition:.2s; -webkit-tap-highlight-color: transparent; }
+.chip-btn:hover, .chip-btn:active { border-color:var(--err); color:var(--err); }
+.overview { display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+.river-progress { flex:1; min-width:180px; }
+.river-progress .label { display:flex; justify-content:space-between; font-size:10px; font-family:'PT Mono',monospace; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted); margin-bottom:8px; }
+.river-progress .label .count { color:var(--gold); }
+.stat-block { text-align:right; }
+.stat-num { font-size:30px; color:var(--gold); line-height:1; }
+.stat-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; margin-top:4px; }
+.view-tabs { max-width: 1200px; margin: 18px auto 0; padding: 0 12px; display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; position:relative; z-index:2; scrollbar-width:none; }
+.view-tabs::-webkit-scrollbar { display:none; }
+.view-tab { flex:0 0 auto; min-width:112px; text-align:center; padding:11px 14px; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-family:'PT Serif',serif; font-size:13.5px; cursor:pointer; transition:.2s; -webkit-tap-highlight-color: transparent; }
+.view-tab:hover { background:var(--bg-panel); color:var(--text); }
+.view-tab.active { background:var(--bg-panel-2); color:var(--gold); border-color:var(--gold-soft); }
+.dash-main { max-width: 1200px; margin: 0 auto; padding: 16px 12px 60px; position: relative; z-index: 2; }
+.tabview { display:none; animation: fadeIn .3s ease; }
+.tabview.active { display:block; }
+.team-panel { background: var(--bg-content); border: 1px solid var(--gold-soft); padding: 16px 16px; margin-bottom: 22px; }
+.team-panel-title { display:flex; justify-content:space-between; align-items:center; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--moss); margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+.team-pool { color: var(--gold); text-transform:none; letter-spacing:0; }
+.team-members { display:flex; gap:8px; flex-wrap:wrap; }
+.team-member-chip { font-size:12.5px; color:var(--text); background:var(--bg-panel-2); border:1px solid var(--border); padding:6px 12px; }
+.team-member-chip.me { border-color:var(--gold-soft); color:var(--gold); }
+.fogpatch { position:absolute; width:150%; height:200%; top:-50%; left:-25%; background: radial-gradient(ellipse at center, rgba(212,224,222,0.06), transparent 60%); filter:blur(6px); animation: fogSwirl 15s ease-in-out infinite; pointer-events:none; }
+@keyframes fogSwirl { 0%{transform:translateX(-4%) rotate(0deg);} 50%{transform:translateX(4%) rotate(2deg);} 100%{transform:translateX(-4%) rotate(0deg);} }
+.map-legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; font-family:'PT Mono',monospace; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; }
+.map-legend span { display:inline-flex; align-items:center; gap:7px; }
+.map-legend i { width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
+.map-legend .lg-tv i { background: var(--gold); }
+.map-legend .lg-dv i { background: var(--moss); }
+.map-legend .lg-sl i { background: var(--mist); }
+.state-legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; font-family:'PT Mono',monospace; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; }
+.state-legend span { display:inline-flex; align-items:center; gap:6px; }
+.state-legend i { width:10px; height:10px; border-radius:50%; display:inline-block; flex-shrink:0; border:1px solid rgba(255,255,255,.15); }
+.state-legend .st-none i { background: var(--bg-card); border-color: var(--border-light); }
+.state-legend .st-pending i { background: var(--moss); box-shadow: 0 0 6px 1px rgba(107,147,131,.7); }
+.state-legend .st-approved i { background: var(--gold); box-shadow: 0 0 6px 1px rgba(194,168,120,.8); }
+.skill-map { position: relative; margin: 0 0 20px; overflow: visible; touch-action: pan-y; }
+@media (min-width: 1300px) {
+  .skill-map { width: 92vw; max-width: 1600px; margin-left: calc(50% - 46vw); margin-right: calc(50% - 46vw); }
+}
+@media (min-width: 900px) and (max-width: 1299px) {
+  .skill-map { width: 108%; max-width: 1300px; margin-left: -4%; margin-right: -4%; }
+}
+.tree-lines { position: absolute; top:0; left:0; pointer-events:none; overflow: visible; z-index:0; }
+.tree-edge { fill:none; stroke: var(--border-light); stroke-width: 1.4; stroke-dasharray: 3 6; opacity: .4; transition: stroke .5s, opacity .5s; }
+.tree-edge.active { stroke: var(--gold); stroke-width: 1.9; stroke-dasharray: none; opacity: .95; filter: drop-shadow(0 0 5px rgba(194,168,120,.65)) drop-shadow(0 0 12px rgba(194,168,120,.35)); }
+.tree-edge-spark { fill: var(--gold); filter: drop-shadow(0 0 6px rgba(194,168,120,.9)); animation: sparkPulse 2.4s ease-in-out infinite; }
+@keyframes sparkPulse { 0%,100%{ opacity:.55; r:2.4; } 50%{ opacity:1; r:3.6; } }
+.tree-node-wrap { position: absolute; z-index: 1; }
+.locked-orb {
+  width: 60px; height: 60px; border-radius: 50%; position: relative; overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, rgba(174,189,189,0.08), var(--bg-panel-2));
+  border: 1px dashed var(--border-light); display:flex; align-items:center; justify-content:center;
+  color: var(--text-muted); font-size: 17px; opacity: .48; cursor: default; transition: opacity .3s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.locked-orb:hover { opacity: .72; transform: scale(1.06); }
+.locked-orb:active { opacity: .8; transform: scale(.95); }
+.locked-orb .lo-icon { position: relative; z-index: 2; opacity: .6; }
+.task-node-orb {
+  width: 78px; height: 78px; border-radius: 50%; position: relative; cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, rgba(194,168,120,0.05), var(--bg-card));
+  border: 1px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition: transform .15s, border-color .25s, box-shadow .25s, filter .5s, opacity .5s;
+  -webkit-tap-highlight-color: transparent;
+}
+.task-node-orb:hover { transform: scale(1.07); }
+.task-node-orb:active { transform: scale(.93); }
+.task-node-orb .tno-icon { font-size: 20px; color: var(--gold); line-height:1; }
+.task-node-orb .tno-pts { font-family:'PT Mono',monospace; font-size: 9.5px; color: var(--text-muted); margin-top: 4px; }
+.task-node-orb .tno-team { position:absolute; bottom:-3px; right:-3px; font-family:'PT Mono',monospace; font-size:7px; color:var(--moss); border:1px solid var(--moss-dim); padding:1px 4px; background:var(--bg-card); border-radius: 7px; }
+.task-node-orb.state-none { opacity:.48; filter: grayscale(.8) brightness(.68); border-style:dashed; }
+.task-node-orb.state-none:hover, .task-node-orb.state-none:active { opacity:.85; filter: grayscale(.3) brightness(.92); }
+.task-node-orb.state-pending { border-color: var(--moss); box-shadow: 0 0 0 1px var(--moss) inset, 0 0 18px -8px rgba(107,147,131,.7); animation: mossPulse 3.2s ease-in-out infinite; }
+.task-node-orb.state-pending .tno-pts { color: var(--moss); }
+.task-node-orb.state-approved { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold-soft), 0 0 22px -8px rgba(194,168,120,.85); animation: goldPulse 3.2s ease-in-out infinite; }
+.task-node-orb.state-approved .tno-icon { color: var(--gold); }
+.task-node-orb.state-rejected { border-color: var(--err); box-shadow: 0 0 14px -8px rgba(192,122,108,.6); }
+.task-node-orb.state-rejected .tno-pts { color: var(--err); }
+@keyframes mossPulse { 0%,100%{ box-shadow: 0 0 0 1px var(--moss) inset, 0 0 14px -8px rgba(107,147,131,.5); } 50%{ box-shadow: 0 0 0 1px var(--moss) inset, 0 0 26px -6px rgba(107,147,131,.85); } }
+@keyframes goldPulse { 0%,100%{ box-shadow: 0 0 0 1px var(--gold-soft), 0 0 18px -8px rgba(194,168,120,.6); } 50%{ box-shadow: 0 0 0 1px var(--gold-soft), 0 0 32px -6px rgba(194,168,120,.95); } }
+.task-node-card {
+  width: clamp(168px, 42vw, 222px);
+  height: 190px;
+  background: var(--bg-card); border: 1px solid var(--border); padding: 16px 16px 14px; cursor: pointer;
+  position: relative; display:flex; flex-direction:column;
+  box-shadow: 0 10px 24px -18px rgba(0,0,0,0.6);
+  transition: border-color .2s, box-shadow .2s, transform .18s, filter .5s, opacity .5s;
+  -webkit-tap-highlight-color: transparent;
+}
+.task-node-card:hover { transform: translateY(-4px); border-color: var(--border-light); box-shadow: 0 18px 32px -18px rgba(0,0,0,0.7); z-index: 3; }
+.task-node-card:active { transform: scale(.97); }
+.tnc-top { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.tnc-icon { width:32px; height:32px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--bg-panel-2); border:1px solid var(--border); color:var(--gold); font-size:14px; }
+.tnc-name { font-size:14px; color:var(--text); font-weight:700; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding-top:2px; }
+.tnc-req { font-size:11.5px; color:var(--text-muted); line-height:1.5; flex:1; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:10px; }
+.tnc-bottom { display:flex; justify-content:space-between; align-items:center; font-size:11px; gap:8px; padding-top:10px; border-top:1px solid var(--border); margin-top:auto; }
+.tnc-pts { color:var(--text-muted); font-family:'PT Mono',monospace; }
+.tnc-pts b { color:var(--gold); }
+.tnc-status { font-family:'PT Mono',monospace; font-size:9px; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border:1px solid var(--border); color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
+.tnc-team { position:absolute; top:10px; right:10px; font-family:'PT Mono',monospace; font-size:8.5px; color:var(--moss); border:1px solid var(--moss-dim); padding:2px 6px; text-transform:uppercase; background:var(--bg-card); }
+.task-node-card.state-none { opacity:.5; filter: grayscale(.75) brightness(.7); border-style:dashed; border-color: var(--border); }
+.task-node-card.state-none:hover, .task-node-card.state-none:active { opacity:.85; filter: grayscale(.3) brightness(.92); }
+.task-node-card.state-pending { border-color: var(--moss); box-shadow: 0 0 0 1px var(--moss) inset, 0 0 24px -10px rgba(107,147,131,.65); animation: mossPulse 3.4s ease-in-out infinite; }
+.task-node-card.state-pending .tnc-status { color: var(--moss); border-color: var(--moss-dim); background: rgba(107,147,131,.14); }
+.task-node-card.state-approved { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold-soft), 0 0 30px -10px rgba(194,168,120,.75); animation: goldPulse 3.4s ease-in-out infinite; }
+.task-node-card.state-approved .tnc-name { color: var(--gold); }
+.task-node-card.state-approved .tnc-status { color: var(--gold); border-color: var(--gold-soft); background: var(--gold-soft); }
+.task-node-card.state-rejected { border-color: var(--err); box-shadow: 0 0 18px -10px rgba(192,122,108,.5); }
+.task-node-card.state-rejected .tnc-status { color: var(--err); border-color: var(--err); }
+.task-node-card.just-revealed { animation: revealCard .7s ease; }
+@keyframes revealCard { 0%{ transform: scale(.9); opacity:.3; filter: grayscale(.6) brightness(.7); } 55%{ transform: scale(1.04); } 100%{ transform: scale(1); opacity:1; filter: grayscale(0) brightness(1); } }
+.modal-backdrop { position: fixed; inset:0; background: rgba(6,10,11,0.88); display:none; align-items:flex-end; justify-content:center; z-index:1000; padding: 0; }
+.modal-backdrop.open { display:flex; animation: fadeIn .2s ease; }
+.task-modal { background: var(--bg-panel); border: 1px solid var(--border); border-bottom:none; padding: 26px 20px calc(26px + env(safe-area-inset-bottom, 0px)); width:100%; max-width: 520px; max-height: 88vh; overflow-y:auto; position:relative; box-shadow: 0 -20px 60px -20px rgba(0,0,0,0.8); }
+.task-modal::before { content:""; position:absolute; left:0; top:0; height:2px; width:64px; background: linear-gradient(90deg, var(--gold), transparent); }
+.modal-close { position:absolute; top:14px; right:16px; cursor:pointer; color:var(--text-muted); font-size:22px; line-height:1; transition:.2s; background:none; border:none; padding:6px; -webkit-tap-highlight-color: transparent; }
+.modal-close:hover { color: var(--gold); }
+.modal-head { display:flex; gap:14px; align-items:center; margin-bottom:16px; padding-right:20px; }
+.modal-icon { width:46px; height:46px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--bg-panel-2); border:1px solid var(--gold-soft); color:var(--gold); font-size:20px; }
+.modal-eyebrow { font-family:'PT Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--moss); margin-bottom:5px; }
+.modal-title { font-size:23px; color:var(--gold); margin:0; line-height:1.2; }
+.modal-req { margin-bottom:14px; }
+.modal-points { font-family:'PT Mono',monospace; font-size:12px; color:var(--text-muted); margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+.modal-points b { color: var(--gold); }
+.status-note { font-size:13px; padding:11px 13px; margin:12px 0; border-left:2px solid var(--border); line-height:1.55; }
+.status-note.pending { color: var(--moss); border-color: var(--moss); background: rgba(107,147,131,.1); }
+.status-note.approved { color: var(--gold); border-color: var(--gold); background: var(--gold-soft); }
+.status-note.rejected { color: var(--err); border-color: var(--err); background: rgba(192,122,108,.08); }
+.submission-view { margin-bottom:6px; }
+.img-preview { max-width:100%; max-height:220px; display:block; margin-bottom:10px; border:1px solid var(--border); }
+textarea { width:100%; background:var(--bg-panel-2); border:1px solid var(--border); color:var(--text); font-family:'PT Serif',serif; font-size:16px; padding:11px 12px; resize:vertical; }
+input[type=file] { color: var(--text-muted); font-size:12.5px; width:100%; }
+.admin-filter-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.admin-filter-row::-webkit-scrollbar { display:none; }
+.admin-filter-btn { flex-shrink:0; font-family:'PT Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; padding:8px 13px; border:1px solid var(--border); background:var(--bg-panel-2); color:var(--text-muted); cursor:pointer; transition:.2s; -webkit-tap-highlight-color: transparent; }
+.admin-filter-btn:hover { border-color: var(--gold-soft); }
+.admin-filter-btn.active { border-color: var(--gold-soft); color: var(--gold); background: var(--gold-soft); }
+.admin-entry { background: var(--bg-card); border:1px solid var(--border); padding:15px 16px; margin-bottom:12px; }
+.admin-entry-top { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:9px; }
+.admin-entry-who { font-size:13.5px; color:var(--gold); }
+.admin-entry-task { font-size:11.5px; color:var(--text-muted); }
+.admin-entry-body { font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.55; }
+.admin-entry-actions { display:flex; gap:8px; }
+.btn-approve { background: var(--gold); color: var(--bg-deep); border:none; padding:9px 15px; font-family:'PT Serif',serif; font-size:12.5px; font-weight:700; cursor:pointer; -webkit-tap-highlight-color: transparent; }
+.btn-approve:hover { opacity:.88; }
+.btn-reject { background: transparent; color: var(--err); border:1px solid var(--err); padding:9px 15px; font-family:'PT Serif',serif; font-size:12.5px; cursor:pointer; -webkit-tap-highlight-color: transparent; }
+.btn-reject:hover { background: rgba(192,122,108,.1); }
+.admin-decided-tag { display:inline-block; font-family:'PT Mono',monospace; font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border:1px solid var(--border); }
+.admin-decided-tag.approved { color:var(--gold); border-color:var(--gold-soft); background:var(--gold-soft); }
+.admin-decided-tag.rejected { color:var(--err); border-color:var(--err); }
+.lore-day-block { margin-bottom: 22px; }
+.lore-day-title { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--moss); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+.lore-day-title::after { content:""; flex:1; height:1px; background:var(--border); }
+.lore-entry { background:var(--bg-card); border:1px solid var(--border); padding:16px 16px; font-size:13.5px; color:var(--text); line-height:1.7; position:relative; }
+.lore-entry.locked { color:var(--text-muted); font-style:italic; position:relative; overflow:hidden; }
+.lore-entry.locked .fogpatch { position:absolute; inset:-30%; background: radial-gradient(ellipse at center, rgba(212,224,222,0.05), transparent 65%); filter:blur(8px); animation: fogSwirl 20s ease-in-out infinite; }
+.stub-block { text-align:center; padding: 60px 20px; color: var(--text-muted); font-style: italic; }
+.empty-hint { color:var(--text-muted); font-size:13px; text-align:center; padding:24px 6px; font-style:italic; }
+.page-footer { max-width: 1200px; margin: 20px auto 0; padding: 20px 16px 0; border-top: 1px solid var(--border); text-align:center; color:var(--text-muted); font-family:'PT Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; position:relative; z-index:2; }
+.toast { position:fixed; bottom:calc(20px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-panel); border:1px solid var(--gold-soft); color:var(--gold); padding:10px 18px; font-family:'PT Mono',monospace; font-size:12px; opacity:0; pointer-events:none; transition:.3s; z-index:2000; max-width: calc(100vw - 32px); text-align:center; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ===================== DESKTOP / LAPTOP: более просторное оформление ===================== */
+@media (min-width: 900px) {
+  header { padding: 40px 24px 24px; }
+  .title { font-size: 34px; margin-bottom: 16px; }
+  .profile-row { flex-wrap: wrap; overflow-x: visible; margin-bottom: 22px; }
+  .chip { padding: 6px 12px; }
+  .overview { gap: 32px; }
+  .river-progress { min-width: 220px; }
+  .stat-num { font-size: 32px; }
+  .stat-label { font-size: 10.5px; }
+  .view-tabs { margin: 22px auto 0; padding: 0 24px; flex-wrap: wrap; overflow-x: visible; gap: 8px; }
+  .view-tab { flex: 1 1 150px; min-width: 150px; padding: 11px 16px; font-size: 14px; }
+  .dash-main { padding: 18px 24px 64px; }
+  .team-panel { padding: 18px 20px; margin-bottom: 26px; }
+  .map-legend, .state-legend { font-size: 10.5px; gap: 18px; }
+  .auth-card { padding: 40px 34px; }
+  .auth-card.medium, .auth-card.snug { max-width: 760px; }
+  .question-text { font-size: 24px; }
+  #storyText.emphasis { font-size: 33px; }
+  .modal-title { font-size: 25px; }
+  .field input, .field textarea { font-size: 14.5px; }
+  .task-node-card { width: clamp(190px, 20vw, 232px); }
+  .page-footer { padding: 20px 24px 0; }
+}
+@media (max-width: 640px) {
+  .auth-card { padding: 24px 18px; }
+  .screen-title { font-size: 25px; }
+  .title { font-size: 24px; }
+  .overview { gap: 14px; }
+  .result-banner { flex-direction: column; text-align: center; }
+  .task-node-card { padding: 14px 14px 12px; height: 176px; }
+  .task-node-card.is-root { height: 122px; }
+}
+/* ================= ТУМАН ВНИЗУ ДЕРЕВА ================= */
+.tree-bottom-fog {
+  position: absolute;
+  left: -10vw;
+  right: -10vw;
+  bottom: -60px; /* Spušteno tačno da pokrije prazan prostor na dnu kontejnera */
+  height: 400px; /* Dovoljno visoko za dugačak, mekan prelaz */
+  
+  /* Magla počinje solidnom bojom pozadine na 0% (dno), 
+     prelazi u tamnu maglu na 35%, a zatim ide u providno (vrh) */
+  background: linear-gradient(to top, var(--bg-deep) 0%, rgba(11, 17, 18, 0.95) 35%, transparent 100%);
+  
+  pointer-events: none;
+  z-index: 4; 
+}
+
+.tree-bottom-fog::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 80%, rgba(174,189,189,0.06), transparent 60%);
+  filter: blur(14px);
+  animation: fogSwirl 20s ease-in-out infinite;
+}
+
+/* ================= ПОЛУПРОЗРАЧНЫЕ ЗАДАНИЯ ================= */
+.foggy-node {
+  opacity: 0.25 !important;
+  filter: blur(1.5px);
+  transition: opacity 0.4s, filter 0.4s, transform 0.15s;
+}
+
+.foggy-node:hover {
+  opacity: 0.8 !important;
+  filter: blur(0);
+}
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute;">
+  <filter id="fogNoise" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.009 0.014" numOctaves="3" seed="7" result="noise">
+      <animate attributeName="baseFrequency" values="0.009 0.014;0.013 0.010;0.009 0.014" dur="50s" repeatCount="indefinite"/>
+    </feTurbulence>
+    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.82  0 0 0 0 0.88  0 0 0 0 0.86  0 0 0 0.6 0"/>
+  </filter>
+</svg>
+<div class="fog-texture" style="filter:url(#fogNoise);"></div>
+<span class="firefly gf1"></span><span class="firefly gf2"></span><span class="firefly gf3"></span><span class="firefly gf4"></span><span class="firefly gf5"></span><span class="firefly gf6"></span>
+<span class="fog-layer fog-1"></span><span class="fog-layer fog-2"></span><span class="fog-layer fog-3"></span><span class="fog-layer fog-4"></span><span class="fog-layer fog-5"></span><span class="fog-layer fog-6"></span>
+<div class="vignette"></div>
+
+<section class="screen active" id="screen-auth">
+  <div class="mist-wrap">
+    <div class="auth-card">
+      <p class="eyebrow">Речное племя · событие</p>
+      <h1 class="display screen-title">Сквозь туман</h1>
+      <p class="lore-text">Туман внезапно окутывает лагерь, и начинают происходить странные вещи. Кто-то не замечает ничего и спокойно спит в своём логове. А кого-то на охоте у Галечного берега хватают за лапы и тащат на глубину.</p>
+      <p class="lore-text muted">Назовись, прежде чем вступить во тьму.</p>
+      <div class="field">
+        <label>Имя персонажа</label>
+        <input type="text" id="inputName" placeholder="Как к тебе обращаться">
+      </div>
+      <div class="field">
+        <label>ID персонажа</label>
+        <input type="text" id="inputId" placeholder="Например, 1707227">
+        <p class="field-hint">По ID тебя узнают в следующий раз — заходи с тем же именем и ID, чтобы вернуться к своему прогрессу.</p>
+      </div>
+      <p class="err-text" id="authErr">Заполни имя и ID, прежде чем вступить во тьму.</p>
+      <button class="btn btn-primary" id="btnStartAuth">Вступить во тьму</button>
+      <p class="hint-small" id="dataSourceHint">Прототип: данные хранятся в этом браузере (localStorage).</p>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-test-intro">
+  <div class="mist-wrap">
+    <div class="auth-card snug">
+      <p class="eyebrow">Видение тумана</p>
+      <h2 class="display screen-title" id="greetName">Туман знает твоё имя</h2>
+      <p class="lore-text">
+        Пройди через пять видений — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong>
+        или хитрый на язык <strong>Кудесник</strong>. Путь выбираешь не ты — решает то, как ты поведёшь себя в тумане.
+        Во время самого теста персонаж ещё не знает, что умеет и к какой команде тяготеет — просто замечай и реагируй.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnStartTest">Войти в видения</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-test">
+  <div class="mist-wrap">
+    <div class="auth-card medium">
+      <div class="test-progress">
+        <div class="test-progress-label"><span>Видение</span><span class="mono" id="testStep">1 / 5</span></div>
+        <div class="river-track"><div class="river-fill" id="testFill"></div></div>
+      </div>
+      <h3 class="display question-text" id="questionText">—</h3>
+      <div class="option-list" id="optionList"></div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-story">
+  <div class="mist-wrap">
+    <div class="auth-card snug story-card" id="storyCard">
+      <p class="story-eyebrow" id="storyEyebrow">Туман расступается</p>
+      <div class="story-icon" id="storyIcon"></div>
+      <p class="lore-text" id="storyText">—</p>
+      <p class="wake-hint story-next">дальше</p>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-result">
+  <div class="mist-wrap">
+    <div class="auth-card medium">
+      <p class="eyebrow">Туман расступился</p>
+      <div class="result-banner" id="resultBanner">
+        <div class="result-icon" id="resultIcon">✦</div>
+        <div class="result-text">
+          <div class="result-path" id="resultPathName">—</div>
+          <div class="result-buff" id="resultBuffText">—</div>
+        </div>
+      </div>
+      <p class="lore-text" id="resultLore" style="margin-top:22px;">—</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnContinueFromResult">Идти дальше</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-final">
+  <div class="mist-wrap">
+    <div class="wake-prompt" id="btnLeaveVision">
+      <h2 class="display screen-title">Ты уверен, что проснулся?</h2>
+      <p class="wake-hint">открыть глаза</p>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-dashboard">
+  <header>
+    <svg class="river-svg" viewBox="0 0 1000 24" preserveAspectRatio="none">
+      <path d="M0,14 C120,4 200,24 340,14 C480,4 560,24 700,14 C840,4 920,24 1000,14 L1000,24 L0,24 Z" fill="none" stroke="var(--river-line)" stroke-width="1.5"/>
+    </svg>
+    <div class="header-inner">
+      <p class="eyebrow">Речное племя · сквозь туман</p>
+      <h1 class="title display">Тропа <span id="dashName">—</span></h1>
+      <div class="profile-row" id="profileRow">
+        <div class="chip chip-gold" id="chipPath">Путь: —</div>
+        <div class="chip chip-gold" id="chipBuff">Бафф: —</div>
+        <div class="chip chip-gold" id="chipAdmin" style="display:none;">Хранитель тумана</div>
+        <div class="chip chip-btn" id="btnDayMinus" title="День события (симуляция)">День <span id="dayNum" class="mono">1</span> −</div>
+        <div class="chip chip-btn" id="btnDayPlus">День +</div>
+        <div class="chip chip-btn" id="btnLogout" title="Выйти и сменить персонажа">Выйти</div>
+      </div>
+      <div class="overview">
+        <div class="river-progress">
+          <div class="label"><span>Принято заданий</span><span class="count mono" id="levelPoints">0 / 0</span></div>
+          <div class="river-track"><div class="river-fill" id="levelFill"></div></div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-num mono" id="personalScore">0</div>
+          <div class="stat-label">личных баллов</div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="view-tabs">
+    <button class="view-tab active" data-tab="tasks">Задания</button>
+    <button class="view-tab" data-tab="lore">Лор</button>
+    <button class="view-tab" data-tab="rewards">Награды</button>
+    <button class="view-tab" data-tab="mod" id="modTabBtn" style="display:none;">Модерация</button>
+  </div>
+  <main class="dash-main">
+    <div class="tabview active" id="tabview-tasks">
+      <p class="lore-text muted" style="margin-bottom:14px;">Задания прорастают друг из друга: тёмные сгустки тумана скрывают то, что ещё не открылось. Отправь отчёт — метка станет зеленоватой, пока туман изучает его. Когда хранители примут задание, метка засветится золотом, и в её сторону протянется золотая нить.</p>
+      <div class="map-legend">
+        <span class="lg-tv"><i></i>Креативность</span>
+        <span class="lg-dv"><i></i>Активность</span>
+        <span class="lg-sl"><i></i>Деятельность</span>
+      </div>
+      <div class="state-legend">
+        <span class="st-none"><i></i>скрыто / ждёт отчёта</span>
+        <span class="st-pending"><i></i>отчёт на проверке</span>
+        <span class="st-approved"><i></i>принято туманом</span>
+      </div>
+      <div class="skill-map" id="taskTree"></div>
+    </div>
+    <div class="tabview" id="tabview-lore"><div id="loreWrap"></div></div>
+    <div class="tabview" id="tabview-rewards">
+      <div class="team-panel" id="teamPanel" style="display:none;">
+        <div class="team-panel-title"><span id="teamPanelName">Твоя команда</span><span class="mono team-pool" id="teamPoolScore">общее кол-во баллов: 0</span></div>
+        <div class="team-members" id="teamMembersDisplay"></div>
+        <p class="hint-small" style="margin-top:10px;">Общее количество баллов команды — сумма личных баллов всех участников (с их баффами). Ни на что, кроме твоего личного прогресса, это не влияет — здесь можно просто следить за успехами команды.</p>
+      </div>
+      <div class="stub-block">Раздел наград появится позже.</div>
+    </div>
+    <div class="tabview" id="tabview-mod">
+      <p class="lore-text muted" style="margin-bottom:18px;">Здесь собираются все отчёты, отправленные в туман. Прими или отклони их — при отклонении можно оставить причину.</p>
+      <div class="admin-filter-row" id="adminFilterRow">
+        <button class="admin-filter-btn active" data-filter="pending">На проверке</button>
+        <button class="admin-filter-btn" data-filter="approved">Принятые</button>
+        <button class="admin-filter-btn" data-filter="rejected">Отклонённые</button>
+        <button class="admin-filter-btn" data-filter="all">Все</button>
+      </div>
+      <div id="adminList"></div>
+    </div>
+  </main>
+</section>
+
+<div class="modal-backdrop" id="taskModalBackdrop">
+  <div class="task-modal" id="taskModal">
+    <button class="modal-close" id="modalCloseBtn">✕</button>
+    <div id="taskModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+const APPS_SCRIPT_URL = '';
+const LEVEL_DAY = [1, 3, 6];
+const BUFF_MULT = 1.2;
+const TEAM_SIZE = 4;
+const ADMIN_CODE = '876798765368994847';
+const SPHERES = {
+  tvorenie:  { name: 'Креативность', icon: '✎' },
+  dvizhenie: { name: 'Активность',   icon: '≈' },
+  slovo:     { name: 'Деятельность', icon: '✦' }
+};
+const MASK_ICON_SVG = '<svg viewBox="0 0 48 48" class="mask-icon" xmlns="http://www.w3.org/2000/svg">'
+  + '<path d="M24 4C12.5 4 4.5 12.8 4.5 23c0 9.4 5.8 17.4 13 20.6 1.4-2.1 2.1-3.1 3.3-3.1s1.9 1 3.3 3.1c7.2-3.2 13-11.2 13-20.6C43.5 12.8 35.5 4 24 4Z" fill="none" stroke="currentColor" stroke-width="1.7"/>'
+  + '<path d="M24 5v37.5" stroke="currentColor" stroke-width="0.9" stroke-dasharray="1.4 3.2" opacity="0.55"/>'
+  + '<path d="M9.5 18.5c2.2-2.6 7-2.8 9.3.3M29.2 18.8c2.2-3 7-2.8 9.3-.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
+  + '<path d="M12.6 24.4c1.3-1.7 4.3-1.7 5.6 0 1.3 1.7 1.3 4.6 0 6.3-1.3 1.7-4.3 1.7-5.6 0-1.3-1.7-1.3-4.6 0-6.3Z" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+  + '<path d="M29.8 24.4c1.3-1.7 4.3-1.7 5.6 0 1.3 1.7 1.3 4.6 0 6.3-1.3 1.7-4.3 1.7-5.6 0-1.3-1.7-1.3-4.6 0-6.3Z" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+  + '<circle cx="15.4" cy="27.5" r="0.9" fill="currentColor"/>'
+  + '<circle cx="32.6" cy="27.5" r="0.9" fill="currentColor"/>'
+  + '<path d="M22.2 31c.7 1.1 2.9 1.1 3.6 0" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none"/>'
+  + '<path d="M16.5 36.2c3 2.3 12 2.3 15 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
+  + '<circle cx="10.5" cy="14.5" r="1" fill="currentColor"/>'
+  + '<circle cx="37.5" cy="14.5" r="1" fill="currentColor"/>'
+  + '</svg>';
+const PATHS = {
+  likotvorcy: {
+    name: 'Ликотворцы', icon: MASK_ICON_SVG, buffSphere: 'tvorenie',
+    lore: 'Их лики скрыты, а взгляд избегает чужих глаз. Ликотворцы сторонятся заводей и оживлённых троп, предпочитая тишину своего шатра. Денно и нощно они лепят, коптят и разукрашивают маски — и верят, что именно маска убережёт от подкрадывающейся нечисти. Работу сопровождают тихие молитвы. Стоит почувствовать холодок по коже — тушат огонь и сыплют соль у порога. Может, они не окажутся в эпицентре событий, но в конце выживут именно те, кто не суёт свою шкуру под клыки каждого встречного монстра.'
+  },
+  ratniki: {
+    name: 'Ратники', icon: '☠', buffSphere: 'dvizhenie',
+    lore: 'Утонуть на глубине, провалиться в зыбучую гальку — их этим не напугать. Ратники готовы к любой угрозе, бьют на опережение и смеются смерти в лицо. Следы тварей их не отпугивают, а лишь раззадоривают: скоро можно будет отыскать очаг опасности и разбить его. Именно благодаря их охоте выжившие всё ещё держатся на плаву. А если Ратник погибнет — он вернётся и убьёт восставших мертвецов.'
+  },
+  kudesniki: {
+    name: 'Кудесники', icon: '☥', buffSphere: 'slovo',
+    lore: 'Даже в самые тяжёлые времена дипломатия занимала почётное место — порой рядом с самыми радикальными решениями. Мантры, обряды, подношения — Кудесники кладут на алтарь всё, лишь бы гости из иномирья позволили пережить грядущую ночь. Некоторые становятся послами: озвучивают намерения потусторонних и умеют извлечь выгоду из любой ситуации. Смерть их не пугает — даже с ней, если понадобится, можно договориться.'
+  }
+};
+const PATH_RESULTS = {
+  likotvorcy: 'Туман оставил тебе маску.\n\nТы не искал встречи с неизвестным, но и не отвернулся от него. Ты смотрел вперёд, думая о том, как защитить себя и тех, кто рядом.\n\nДля тебя выжить означает быть готовым к тому, что придёт следующей ночью.\n\nТы — Ликотворец.',
+  ratniki: 'Туман оставил тебе след.\n\nТы не стал ждать, пока опасность сама найдёт тебя. Ты шёл навстречу неизвестному, когда остальные предпочитали держаться подальше.\n\nДля тебя лучший способ пережить ночь — встретить её первым.\n\nТы — Ратник.',
+  kudesniki: 'Туман оставил тебе голос.\n\nТы не стал довольствоваться тем, что увидел. Ты искал связи, собирал детали и пытался понять то, чему ещё не было объяснения.\n\nДля тебя даже с тем, что пришло из-за границы привычного мира, можно найти общий язык.\n\nТы — Кудесник.'
+};
+const VISIONS = [
+  {
+    text: 'Ты выходишь с Поляны для сна и видишь, что туман добрался до Камышовой поляны. Там как раз должны были собрать патруль, но на поляне пусто.',
+    options: [
+      { letter:'а', t:'Не решаешься подойти к туману, но остаёшься у камышей. В дымке постоянно появляются новые очертания, и тебе интересно, как бы ты описал их тому, кто этого не видел.', p:'likotvorcy' },
+      { letter:'б', t:'Сразу идёшь в туман искать патрульных, чтобы убедиться, что с ними всё в порядке.', p:'ratniki' },
+      { letter:'в', t:'Изучаешь следы у края поляны, пытаясь понять, куда мог исчезнуть патруль.', p:'kudesniki' }
+    ]
+  },
+  { branches: {
+      'а': {
+        text: 'Ты решаешь вернуться к Поляне для сна. Но чем дальше отходишь от Камышовой поляны, тем тише становится вокруг. По дороге замечаешь, что у Старого вяза непривычно тихо. Обычно оттуда доносится ворчание старейшин, а сейчас не слышно ни звука.',
+        options: [
+          { letter:'а', t:'Проходишь мимо, но замечаешь необычное сочетание ветвей и теней. Ты останавливаешься и думаешь, как можно было бы нарисовать то, что видишь.', p:'likotvorcy' },
+          { letter:'б', t:'Идёшь к Старому вязу проверить, что случилось со старейшинами.', p:'ratniki' },
+          { letter:'в', t:'Осматриваешь землю вокруг вяза, пытаясь понять, что здесь произошло и не было ли чужих следов.', p:'kudesniki' }
+        ] },
+      'б': {
+        text: 'Ты продолжаешь искать патрульных, но знакомые следы постепенно теряются в тумане. Вскоре ты выходишь на Мшистую полянку. Патрульных здесь тоже нет, только разбросанные по земле вещи.',
+        options: [
+          { letter:'а', t:'Не решаешься приблизиться, но одна из оставленных вещей привлекает твоё внимание. Ты рассматриваешь её и начинаешь придумывать, какую историю она могла бы рассказать.', p:'likotvorcy' },
+          { letter:'б', t:'Идёшь дальше по лагерю, выкрикивая имена пропавших котов.', p:'ratniki' },
+          { letter:'в', t:'Остаёшься на поляне и внимательно изучаешь разбросанные вещи и следы, пытаясь понять, что произошло.', p:'kudesniki' }
+        ] },
+      'в': {
+        text: 'Ты продолжаешь идти вдоль следов, стараясь не потерять их в тумане. Вскоре они приводят тебя к краю Камышовой поляны. Туман сгущается, и в нём появляется силуэт, слишком похожий на соплеменника.',
+        options: [
+          { letter:'а', t:'Отходишь в камыши, чтобы не приближаться к силуэту. Он кажется настолько странным, что ты начинаешь придумывать, на что его можно сравнить.', p:'likotvorcy' },
+          { letter:'б', t:'Подходишь к силуэту, чтобы выяснить, кто это и что происходит.', p:'ratniki' },
+          { letter:'в', t:'Внимательно следишь за силуэтом, пытаясь понять, действительно ли перед тобой соплеменник.', p:'kudesniki' }
+        ] }
+  } },
+  { branches: {
+      'а': {
+        text: 'Ты отходишь от Старого вяза и продолжаешь путь к Поляне для сна. Но туман уже успел добраться и сюда, поэтому знакомая тропа скрывается из виду. Тебе приходится идти наугад. Вскоре впереди показывается Пещера с травами. У входа никого нет, хотя обычно здесь дозорят Наблюдатели.',
+        options: [
+          { letter:'а', t:'Не заходишь внутрь, но замечаешь тени растений на влажном камне. Некоторые из них напоминают тебе знакомые вещи, другие хочется дорисовать.', p:'likotvorcy' },
+          { letter:'б', t:'Заходишь внутрь, чтобы проверить, не нужна ли кому-нибудь помощь.', p:'ratniki' },
+          { letter:'в', t:'Осматриваешь землю у входа, пытаясь понять, когда здесь в последний раз кто-то был.', p:'kudesniki' }
+        ] },
+      'б': {
+        text: 'Ты уходишь от Кучи с добычей и продолжаешь искать пропавших. Чем дальше идёшь, тем труднее понять, где находишься. Наконец впереди показывается Палатка предводителя. Рядом нет ни одного стражника. Вход приоткрыт.',
+        options: [
+          { letter:'а', t:'Не приближаешься ко входу, но замечаешь несколько царапин на камне. Ты рассматриваешь их и думаешь, как бы описал этот странный рисунок.', p:'likotvorcy' },
+          { letter:'б', t:'Входишь внутрь, чтобы проверить, что произошло.', p:'ratniki' },
+          { letter:'в', t:'Задерживаешься у входа и изучаешь обстановку, пытаясь понять, что здесь произошло.', p:'kudesniki' }
+        ] },
+      'в': {
+        text: 'Ты покидаешь Тенистую поляну и продолжаешь идти по следам, оставшимся на земле. Они становятся всё слабее, пока наконец не приводят тебя к Дальнему уголку. Здесь пусто. На земле остались следы, а в воздухе всё ещё чувствуется сырость.',
+        options: [
+          { letter:'а', t:'Садишься в стороне и рассматриваешь следы. Один отпечаток кажется необычным, и тебе хочется срисовать его на земле.', p:'likotvorcy' },
+          { letter:'б', t:'Отправляешься искать участников собрания, пока их следы ещё можно найти.', p:'ratniki' },
+          { letter:'в', t:'Осматриваешь место собрания, пытаясь понять по оставшимся следам, что здесь происходило.', p:'kudesniki' }
+        ] }
+  } },
+  { intro: 'Туман начинает рассеиваться. Знакомые очертания лагеря постепенно возвращаются, а впереди показывается Тенистая поляна. На этот раз здесь действительно собираются на собрание. Коты переглядываются. Каждый видел что-то своё. Кто-то говорит о пропавшем патруле, кто-то видел силуэт у Камышовой поляны, а кто-то утверждает, что ночью слышал голоса из воды. Никто не может понять, что из произошедшего было настоящим. Наконец все взгляды обращаются к тебе.',
+    branches: {
+      'а': {
+        text: 'Ты всю ночь замечал странные вещи, которые теперь трудно собрать воедино. Отдельные тени, следы, силуэты, цвета. Всё это почему-то не выходит из головы.',
+        options: [
+          { letter:'а', t:'Предлагаешь зарисовать всё необычное, что удалось увидеть этой ночью, пока детали ещё свежи в памяти.', p:'likotvorcy' },
+          { letter:'б', t:'Предлагаешь отправить поисковую группу к Галечному берегу, пока следы ещё свежи.', p:'ratniki' },
+          { letter:'в', t:'Предлагаешь сначала собрать всё, что известно о произошедшем, и сопоставить свидетельства.', p:'kudesniki' }
+        ] },
+      'б': {
+        text: 'Ты всю ночь искал пропавших и заглядывал туда, куда остальные боялись идти. Теперь ждать уже не хочется.',
+        options: [
+          { letter:'а', t:'Предлагаешь зарисовать странный силуэт, который видели у Камышовой поляны, чтобы остальные тоже могли понять, что именно ты видел.', p:'likotvorcy' },
+          { letter:'б', t:'Требуешь немедленно отправиться к Галечному берегу и найти источник происходящего.', p:'ratniki' },
+          { letter:'в', t:'Предлагаешь сначала расспросить тех, кто видел туман и его обитателей, чтобы восстановить последовательность событий.', p:'kudesniki' }
+        ] },
+      'в': {
+        text: 'Ты всю ночь собирал сведения и сопоставлял детали. Теперь перед собранием наконец складывается хоть какая-то картина. Но одного ответа всё ещё нет: что делать дальше?',
+        options: [
+          { letter:'а', t:'Предлагаешь записать всё, что удалось увидеть этой ночью, и сохранить самые необычные детали.', p:'likotvorcy' },
+          { letter:'б', t:'Предлагаешь отправиться к Галечному берегу и проверить самые опасные места.', p:'ratniki' },
+          { letter:'в', t:'Предлагаешь попытаться вступить в контакт с теми, кто появляется из тумана, прежде чем начинать охоту.', p:'kudesniki' }
+        ] }
+  } }
+];
+const DEMO_FREE_AGENTS = [
+  { id: 'demo-lisa',  name: 'Лиса',  path: 'kudesniki' },
+  { id: 'demo-bars',  name: 'Барс',  path: 'ratniki' },
+  { id: 'demo-sova',  name: 'Сова',  path: 'kudesniki' },
+  { id: 'demo-vydra', name: 'Выдра', path: 'ratniki' },
+  { id: 'demo-volk',  name: 'Волк',  path: 'kudesniki' },
+  { id: 'demo-tsapl', name: 'Цапля', path: 'ratniki' }
+];
+const DEMO_TASKS_BY_LEVEL = [
+  { tvorenie: [
+      { id:'l1-tv-1', name:'Сшить оберег из подручных лоскутов', req:'Опиши технику и материалы, приложи фото или подробное описание процесса — важна не сложность, а то, что оберег сделан своими руками именно в дни события.', pts:2, sphere:'tvorenie', team:false },
+      { id:'l1-tv-2', name:'Изобразить первый набросок своей маски', req:'Рисунок, коллаж или развёрнутое текстовое описание того, какой будет твоя маска и почему именно такой.', pts:2, sphere:'tvorenie', team:false },
+      { id:'l1-tv-t1', name:'Сделать общий костюмный элемент команды', req:'Совместный пост с вкладом каждого участника команды — деталь общего образа, которую можно будет узнать издалека.', pts:3, sphere:'tvorenie', team:true }
+    ],
+    dvizhenie: [
+      { id:'l1-dv-1', name:'Пройти вдоль тумана, не оставляя следа', req:'Короткий отчёт от первого лица о том, как проходила вылазка и что удалось заметить по пути.', pts:2, sphere:'dvizhenie', team:false },
+      { id:'l1-dv-2', name:'Разведать кромку тумана в одиночку', req:'Отчёт о находках — что видел, слышал, чувствовал на границе тумана.', pts:2, sphere:'dvizhenie', team:false },
+      { id:'l1-dv-t1', name:'Устроить совместный дозор', req:'Совместный пост с напарником(-ами) о ночном или дневном дозоре вдоль тумана.', pts:3, sphere:'dvizhenie', team:true }
+    ],
+    slovo: [
+      { id:'l1-sl-1', name:'Прошептать три охранных слова у костра', req:'Мини-пост от 150 слов — отыгрыш ритуала или размышление персонажа о том, что значат эти слова для него.', pts:2, sphere:'slovo', team:false },
+      { id:'l1-sl-2', name:'Выторговать у соседа по лагерю час тишины', req:'Диалог с NPC или другим игроком, в котором персонаж пытается о чём-то договориться.', pts:2, sphere:'slovo', team:false },
+      { id:'l1-sl-t1', name:'Провести общий обряд подношения туману', req:'Отыгрыш всей командой, от 3 реплик каждого участника — развёрнутая сцена ритуала.', pts:3, sphere:'slovo', team:true }
+    ]
+  },
+  { tvorenie: [
+      { id:'l2-tv-1', name:'Расписать вторую маску — уже под свой лик', req:'Фото или описание с явной отсылкой к первой маске — покажи, чем изменился персонаж со времён первого уровня.', pts:3, sphere:'tvorenie', team:false },
+      { id:'l2-tv-2', name:'Выковать что-то по образу найденного амулета', req:'Пост с подробным описанием процесса и того, на что был похож найденный образец.', pts:3, sphere:'tvorenie', team:false },
+      { id:'l2-tv-t1', name:'Собрать общий алтарь подношений', req:'Общий пост, вклад каждого участника команды описан отдельно.', pts:4, sphere:'tvorenie', team:true }
+    ],
+    dvizhenie: [
+      { id:'l2-dv-1', name:'Найти проход сквозь загустевший туман', req:'Пост-отчёт, можно с самодельной картой маршрута и описанием препятствий.', pts:3, sphere:'dvizhenie', team:false },
+      { id:'l2-dv-2', name:'Пройти по кромке зыбкой гальки', req:'Отчёт от первого лица о риске и о том, что удалось разглядеть по пути.', pts:3, sphere:'dvizhenie', team:false },
+      { id:'l2-dv-t1', name:'Провести совместную разведку истока', req:'Общий пост-отчёт команды о разведке в сторону истока тумана.', pts:4, sphere:'dvizhenie', team:true }
+    ],
+    slovo: [
+      { id:'l2-sl-1', name:'Расспросить старших о примете тумана', req:'Отыгрыш или короткий пост с изложением услышанной приметы.', pts:3, sphere:'slovo', team:false },
+      { id:'l2-sl-2', name:'Записать вторую главу дневника события', req:'Мини-пост, от 150 слов, продолжение записей персонажа.', pts:3, sphere:'slovo', team:false },
+      { id:'l2-sl-t1', name:'Договориться с соседним лагерем об обмене', req:'Совместный пост-диалог команды с описанием условий сделки.', pts:4, sphere:'slovo', team:true }
+    ]
+  },
+  { tvorenie: [
+      { id:'l3-tv-1', name:'Сжечь первую маску — она сделала своё дело', req:'Финальный пост цикла масок — рефлексия персонажа о пройденном пути.', pts:4, sphere:'tvorenie', team:false },
+      { id:'l3-tv-t1', name:'Провести командой обряд закрытия события', req:'Общий финальный пост со сценой обряда и участием каждого.', pts:5, sphere:'tvorenie', team:true }
+    ],
+    dvizhenie: [
+      { id:'l3-dv-1', name:'Дойти до истока тумана', req:'Развёрнутый отчёт, от 400 слов, с описанием всего пути и того, что было обнаружено у истока.', pts:4, sphere:'dvizhenie', team:false },
+      { id:'l3-dv-t1', name:'Сопроводить команду к истоку тумана', req:'Общий пост-отчёт команды о совместном походе к истоку.', pts:5, sphere:'dvizhenie', team:true }
+    ],
+    slovo: [
+      { id:'l3-sl-1', name:'Произнести имя тумана вслух', req:'Финальная сцена отыгрыша — кульминационный момент истории персонажа.', pts:4, sphere:'slovo', team:false },
+      { id:'l3-sl-t1', name:'Заключить итоговый уговор с туманом от лица команды', req:'Финальный отыгрыш команды, желательно с мастером или NPC.', pts:5, sphere:'slovo', team:true }
+    ]
+  }
+];
+let TASKS_BY_LEVEL = DEMO_TASKS_BY_LEVEL;
+let ALL_TASKS = [];
+function rebuildAllTasks(){
+  ALL_TASKS = [];
+  TASKS_BY_LEVEL.forEach((level, levelIdx) => {
+    Object.keys(SPHERES).forEach(sk => {
+      (level[sk] || []).forEach(t => ALL_TASKS.push(Object.assign({}, t, { level: levelIdx })));
+    });
+  });
+}
+rebuildAllTasks();
+function hashStr(s){ let h = 0; for(let i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; } return Math.abs(h); }
+function jitter(seed, range){ return ((hashStr(seed) % 1000) / 1000 - 0.5) * 2 * range; }
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const TASK_ORDER_SEED = 170717;
+function shuffleArr(arr, rng){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); const tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
+  return a;
+}
+function buildTaskOrder(){
+  const rng = mulberry32(TASK_ORDER_SEED);
+  const byPts = {};
+  ALL_TASKS.forEach(t => { (byPts[t.pts] = byPts[t.pts] || []).push(t.id); });
+  const ptsKeys = Object.keys(byPts).map(Number).sort((a,b) => a-b);
+  let order = [];
+  ptsKeys.forEach(p => { order = order.concat(shuffleArr(byPts[p], rng)); });
+  return order;
+}
+let TASK_ORDER = [];
+let TASK_DEPENDS = {};
+function rebuildTaskDepends(){
+  TASK_ORDER = buildTaskOrder();
+  TASK_DEPENDS = {};
+  TASK_ORDER.forEach((id, i) => {
+    if(i === 0){ TASK_DEPENDS[id] = null; }
+    else {
+      const parentIdx = Math.floor((i-1)/2);
+      TASK_DEPENDS[id] = { any: [TASK_ORDER[parentIdx]] };
+    }
+  });
+}
+const depthCache = {};
+function taskDepth(id){
+  if(depthCache[id] !== undefined) return depthCache[id];
+  depthCache[id] = 0;
+  const dep = TASK_DEPENDS[id];
+  const ids = dep ? (dep.any || dep.all || []) : [];
+  const d = ids.length ? Math.max.apply(null, ids.map(taskDepth)) + 1 : 0;
+  depthCache[id] = d;
+  return d;
+}
+function resetDepthCache(){ Object.keys(depthCache).forEach(k => delete depthCache[k]); }
+const LORE_INTRO = 'Основа сюжета — туман. Он окутывает лагерь внезапно, и вместе с ним начинают происходить странные вещи. Важный момент: происходящее — не совсем «взаправду». Кто-то ничего не замечает и живёт как ни в чём не бывало, а кого-то на охоте хватают за лапы и тащат на глубину. Именно из этого зыбкого пространства являются полурыбы-полукоты — мерфолки, утопцы, как их ни назови. Свидетельства о них разнятся: кто-то божится, что с ними можно поговорить, а кто-то видел лишь далёкий силуэт на воде. Ещё один житель здешней мифологии — омутовки. Скопления веток, мусора и тины, что иногда всплывают на поверхности воды. Некоторые принимают их за жутких существ. А может, оно так и есть — кто знает.';
+const LORE = [
+  { day: 1, title: 'День первый', text: '(будет текст)' },
+  { day: 2, title: 'День второй', text: '(будет текст)' },
+  { day: 4, title: 'День четвёртый', text: '(будет текст)' },
+  { day: 6, title: 'День шестой', text: '(будет текст)' },
+  { day: 7, title: 'День седьмой', text: '(будет текст)' }
+];
+const LS_USERS='tuman_users', LS_TEAMS='tuman_teams', LS_SESSION='tuman_session',
+      LS_PROGRESS='tuman_progress', LS_TEAMPROGRESS='tuman_teamprogress',
+      LS_EVENTSTART='tuman_eventstart', LS_DEVOFFSET='tuman_devoffset', LS_REGORDER='tuman_regorder';
+function loadJSON(key, fallback){ try { const v = JSON.parse(localStorage.getItem(key)); return v || fallback; } catch(e){ return fallback; } }
+function saveJSON(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e){ toast('Не удалось сохранить — возможно, файл слишком большой'); return false; } }
+rebuildTaskDepends();
+let users = loadJSON(LS_USERS, {});
+let teams = loadJSON(LS_TEAMS, {});
+let progress = loadJSON(LS_PROGRESS, {});
+let teamProgress = loadJSON(LS_TEAMPROGRESS, {});
+let regOrder = loadJSON(LS_REGORDER, []);
+if(!localStorage.getItem(LS_EVENTSTART)) localStorage.setItem(LS_EVENTSTART, String(Date.now()));
+function rebuildTeamsFromOrder(){
+  teams = {};
+  for(let i=0; i<regOrder.length; i+=TEAM_SIZE){
+    const idx = Math.floor(i/TEAM_SIZE)+1;
+    const id = 'team-'+idx;
+    const chunk = regOrder.slice(i, i+TEAM_SIZE);
+    teams[id] = { id, size: TEAM_SIZE, members: chunk.slice() };
+    chunk.forEach(mid => { if(users[mid]) users[mid].teamId = id; });
+  }
+  saveTeams(); saveUsers();
+}
+function registerInTeamOrder(uid){
+  if(regOrder.indexOf(uid) === -1){ regOrder.push(uid); saveJSON(LS_REGORDER, regOrder); }
+  rebuildTeamsFromOrder();
+}
+(function seedDemo(){
+  let changed = false;
+  DEMO_FREE_AGENTS.forEach(a => {
+    if(!users[a.id]){ users[a.id] = { id:a.id, name:a.name, path:a.path, teamId:null, demo:true }; changed = true; }
+  });
+  if(regOrder.length === 0){ regOrder = DEMO_FREE_AGENTS.map(a => a.id); changed = true; }
+  saveUsers();
+  if(changed) saveJSON(LS_REGORDER, regOrder);
+  rebuildTeamsFromOrder();
+})();
+let session = { userId: localStorage.getItem(LS_SESSION) || null };
+let adminFilter = 'pending';
+let currentModalUser = null, currentModalTask = null;
+function $(sel){ return document.querySelector(sel); }
+function $all(sel){ return Array.from(document.querySelectorAll(sel)); }
+function showScreen(id){ $all('.screen').forEach(s => s.classList.remove('active')); $('#'+id).classList.add('active'); window.scrollTo(0,0); }
+function toast(msg){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(toast._h); toast._h=setTimeout(()=>t.classList.remove('show'),2200); }
+function currentUser(){ return session.userId ? users[session.userId] : null; }
+function saveUsers(){ saveJSON(LS_USERS, users); }
+function saveTeams(){ saveJSON(LS_TEAMS, teams); }
+function saveProgress(){ saveJSON(LS_PROGRESS, progress); }
+function saveTeamProgress(){ saveJSON(LS_TEAMPROGRESS, teamProgress); }
+function userProgress(uid){ if(!progress[uid]) progress[uid] = {}; return progress[uid]; }
+function round1(n){ return Math.round(n*10)/10; }
+function escapeHtml(str){ return String(str==null?'':str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+function getCurrentDay(){
+  const start = parseInt(localStorage.getItem(LS_EVENTSTART), 10) || Date.now();
+  const offset = parseInt(localStorage.getItem(LS_DEVOFFSET), 10) || 0;
+  const realDay = Math.floor((Date.now()-start)/86400000)+1;
+  return Math.max(1, realDay+offset);
+}
+function teamDisplayName(t){ return 'Команда No' + t.id.split('-')[1]; }
+function computeFinalPts(u, task){
+  const path = u.path && PATHS[u.path];
+  const isBuff = path && path.buffSphere === task.sphere;
+  return isBuff ? round1(task.pts * BUFF_MULT) : task.pts;
+}
+function getTaskState(u, task){
+  if(!u) return { status:'none' };
+  if(task.team){
+    const tp = (u.teamId && teamProgress[u.teamId]) || {};
+    return tp[task.id] || { status:'none' };
+  }
+  const p = userProgress(u.id);
+  return p[task.id] || { status:'none' };
+}
+function setTaskState(u, task, state){
+  if(task.team){
+    if(!u.teamId) return;
+    if(!teamProgress[u.teamId]) teamProgress[u.teamId] = {};
+    teamProgress[u.teamId][task.id] = state;
+    saveTeamProgress();
+  } else {
+    const p = userProgress(u.id);
+    p[task.id] = state;
+    saveProgress();
+  }
+}
+function isTaskUnlockedByDeps(u, task){
+  if(getTaskState(u, task).status !== 'none') return true;
+  const dep = TASK_DEPENDS[task.id];
+  if(!dep) return true;
+  const ids = dep.any || dep.all || [];
+  if(!ids.length) return true;
+  const isApproved = tid => {
+    const t = ALL_TASKS.find(x => x.id === tid);
+    return !!t && getTaskState(u, t).status === 'approved';
+  };
+  return dep.all ? ids.every(isApproved) : ids.some(isApproved);
+}
+function completedTaskCount(u){ return ALL_TASKS.filter(t => getTaskState(u, t).status === 'approved').length; }
+function personalScore(u){
+  return round1(ALL_TASKS.reduce((s, t) => {
+    const st = getTaskState(u, t);
+    return s + (st.status === 'approved' ? computeFinalPts(u, t) : 0);
+  }, 0));
+}
+async function syncTasksFromSheet(){
+  if(!APPS_SCRIPT_URL) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=tasks');
+    const data = await res.json();
+    if(data && data.tvorenie && data.dvizhenie && data.slovo){
+      const rebuilt = [0,1,2].map(i => ({
+        tvorenie:  (data.tvorenie[i+1]  || []),
+        dvizhenie: (data.dvizhenie[i+1] || []),
+        slovo:     (data.slovo[i+1]     || [])
+      }));
+      TASKS_BY_LEVEL = rebuilt;
+      rebuildAllTasks();
+      rebuildTaskDepends();
+      resetDepthCache();
+      $('#dataSourceHint').textContent = 'Задания синхронизированы с Google Таблицей.';
+      if(currentUser()) renderDashboard();
+    }
+  } catch(e){ console.warn('Не удалось загрузить задания из Таблицы, использую встроенный набор.', e); }
+}
+function registerParticipantInSheet(id, name){
+  if(!APPS_SCRIPT_URL) return;
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action:'register', id, name, ts: Date.now() })
+  }).catch(e => console.warn('Не удалось записать участника в Таблицу', e));
+}
+$('#btnStartAuth').addEventListener('click', () => {
+  const name = $('#inputName').value.trim();
+  const id = $('#inputId').value.trim();
+  const err = $('#authErr');
+  const isAdminCode = (id === ADMIN_CODE);
+  if(!id || (!name && !isAdminCode)){ err.classList.add('show'); return; }
+  err.classList.remove('show');
+  const finalName = name || 'Хранитель тумана';
+  let u = users[id];
+  const isNew = !u;
+  if(u){ u.name = finalName; } else { u = { id, name: finalName, path: null, teamId: null }; users[id] = u; }
+  if(isAdminCode) u.isAdmin = true;
+  session.userId = id;
+  localStorage.setItem(LS_SESSION, id);
+  saveUsers();
+if(isAdminCode){
+  if(!u.path) u.path = 'kudesniki';
+  showScreen('screen-dashboard'); 
+  renderDashboard(); 
+  return;
+}
+  if(isNew){ registerInTeamOrder(id); registerParticipantInSheet(id, finalName); }
+  routeAfterLogin();
+});
+function routeAfterLogin(){
+  const u = currentUser();
+  if(u.path){ showScreen('screen-dashboard'); renderDashboard(); }
+  else { $('#greetName').textContent = 'Туман знает тебя, ' + u.name; showScreen('screen-test-intro'); }
+}
+function doLogout(){
+  session.userId = null;
+  localStorage.removeItem(LS_SESSION);
+  $('#inputName').value = ''; $('#inputId').value = '';
+  showScreen('screen-auth');
+}
+let visionStep = 0, lastLetter = null, testTally = { likotvorcy:0, ratniki:0, kudesniki:0 };
+$('#btnStartTest').addEventListener('click', () => {
+  visionStep = 0; lastLetter = null; testTally = { likotvorcy:0, ratniki:0, kudesniki:0 };
+  renderQuestion(); showScreen('screen-test');
+});
+function currentVision(){
+  const step = VISIONS[visionStep];
+  if(visionStep === 0) return { text: step.text, options: step.options };
+  const branch = step.branches[lastLetter];
+  return { text: (step.intro ? step.intro + ' ' : '') + branch.text, options: branch.options };
+}
+function renderQuestion(){
+  const vision = currentVision();
+  $('#testStep').textContent = (visionStep+1) + ' / ' + VISIONS.length;
+  $('#testFill').style.width = Math.round((visionStep/VISIONS.length)*100) + '%';
+  $('#questionText').textContent = vision.text;
+  const wrap = $('#optionList'); wrap.innerHTML = '';
+  vision.options.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'option-item'; div.textContent = opt.t;
+    div.addEventListener('click', () => {
+      testTally[opt.p]++; lastLetter = opt.letter; visionStep++;
+      if(visionStep < VISIONS.length) renderQuestion();
+      else { $('#testFill').style.width = '100%'; finishTest(); }
+    });
+    wrap.appendChild(div);
+  });
+}
+const WAKE_STORY = [
+  { eyebrow: 'Туман рассеивается', text: 'Ты резко дёргаешься и открываешь глаза. Всё вокруг тихо. Постепенно возвращаются привычные звуки лагеря: где-то кричит птица, шуршат листья, кто-то проходит мимо.' },
+  { eyebrow: 'Пробуждение', text: 'Ты лежишь на Поляне для сна. Утренний свет пробивается сквозь ветви. Несколько мгновений ты просто лежишь, пытаясь вспомнить, что тебе снилось.' },
+  { eyebrow: 'Поляна для сна', text: 'Наверное, просто сон.' },
+  { eyebrow: 'Но что-то не так', text: 'Ты уже собираешься выбраться из логова, когда замечаешь туман между деревьями. Точно такой же, как во сне. Он медленно подбирается к лагерю. И где-то из его глубины доносится знакомый голос. Ты не успеваешь понять, кому он принадлежит.' }
+];
+const ITOG_INTRO_STORY = [
+  { eyebrow: 'Итог видений', text: 'Так это был не сон.', emphasis: true },
+  { eyebrow: 'Итог видений', text: 'Туман видел тебя так же ясно, как ты видел его. И, кажется, за эту ночь он уже успел решить, кем ты будешь.' }
+];
+let storyQueue = [], storyIndex = 0, storyOnComplete = null;
+function renderStoryItem(item){
+  $('#storyEyebrow').textContent = item.eyebrow || 'Туман расступается';
+  $('#storyText').textContent = item.text;
+  $('#storyText').classList.toggle('emphasis', !!item.emphasis);
+  $('#storyText').classList.toggle('reveal', !!item.icon);
+  const iconEl = $('#storyIcon');
+  if(item.icon){ iconEl.innerHTML = item.icon; iconEl.classList.add('show'); }
+  else { iconEl.textContent = ''; iconEl.classList.remove('show'); }
+}
+function playStory(items, onComplete){
+  storyQueue = items; storyIndex = 0; storyOnComplete = onComplete;
+  renderStoryItem(storyQueue[0]);
+  showScreen('screen-story');
+}
+$('#storyCard').addEventListener('click', () => {
+  storyIndex++;
+  if(storyIndex < storyQueue.length){ renderStoryItem(storyQueue[storyIndex]); }
+  else { const cb = storyOnComplete; storyOnComplete = null; if(cb) cb(); }
+});
+function finishTest(){
+  let best='likotvorcy', bestVal=-1;
+  Object.keys(testTally).forEach(k => { if(testTally[k] > bestVal){ bestVal=testTally[k]; best=k; } });
+  const u = currentUser();
+  u.path = best;
+  saveUsers();
+  const fullStory = WAKE_STORY.concat(ITOG_INTRO_STORY).concat([{ eyebrow:'Кем ты стал', text: PATH_RESULTS[best] }]);
+  playStory(fullStory, () => goToResultScreen());
+}
+function goToResultScreen(){
+  const u = currentUser();
+  const path = PATHS[u.path];
+  const buff = SPHERES[path.buffSphere];
+  $('#resultIcon').innerHTML = path.icon;
+  $('#resultPathName').textContent = path.name;
+  $('#resultBuffText').textContent = 'Туман даёт бафф +' + Math.round((BUFF_MULT-1)*100) + '% к баллам за задания сферы «' + buff.name + '»';
+  $('#resultLore').textContent = path.lore;
+  showScreen('screen-result');
+}
+$('#btnContinueFromResult').addEventListener('click', () => { showScreen('screen-final'); });
+$('#btnLeaveVision').addEventListener('click', () => { showScreen('screen-dashboard'); renderDashboard(); });
+$('#btnLogout').addEventListener('click', doLogout);
+$('#btnDayMinus').addEventListener('click', () => bumpDevDay(-1));
+$('#btnDayPlus').addEventListener('click', () => bumpDevDay(1));
+function bumpDevDay(delta){
+  const cur = parseInt(localStorage.getItem(LS_DEVOFFSET), 10) || 0;
+  const start = parseInt(localStorage.getItem(LS_EVENTSTART), 10) || Date.now();
+  const realDay = Math.floor((Date.now()-start)/86400000)+1;
+  const proposedOffset = cur + delta;
+  if(realDay + proposedOffset < 1) return;
+  localStorage.setItem(LS_DEVOFFSET, String(proposedOffset));
+  renderDashboard();
+}
+$all('.view-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    $all('.view-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    $all('.tabview').forEach(v => v.classList.remove('active'));
+    $('#tabview-' + tab.dataset.tab).classList.add('active');
+    if(tab.dataset.tab === 'mod') renderAdminList();
+    
+    // ДОБАВИТЬ ЭТИ 4 СТРОЧКИ:
+    if(tab.dataset.tab === 'tasks') {
+       const u = currentUser();
+       if(u) renderTaskTree(u);
+    }
+  })
+});
+$all('.admin-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    adminFilter = btn.dataset.filter;
+    $all('.admin-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAdminList();
+  });
+});
+function renderDashboard(){
+  const u = currentUser();
+  const path = PATHS[u.path];
+  const day = getCurrentDay();
+  $('#dashName').textContent = u.name;
+  $('#dayNum').textContent = day;
+  $('#chipPath').textContent = 'Путь: ' + path.name;
+  $('#chipBuff').textContent = 'Бафф: +' + Math.round((BUFF_MULT-1)*100) + '% · ' + SPHERES[path.buffSphere].name;
+  $('#chipAdmin').style.display = u.isAdmin ? 'inline-block' : 'none';
+  const score = personalScore(u);
+  $('#personalScore').textContent = score;
+  const total = ALL_TASKS.length;
+  const done = completedTaskCount(u);
+  $('#levelPoints').textContent = done + ' / ' + total;
+  $('#levelFill').style.width = (total ? Math.min(100, (done/total)*100) : 0) + '%';
+  renderTaskTree(u);
+  renderLore(day);
+  renderRewardsTab(u);
+  const modBtn = $('#modTabBtn');
+  if(u.isAdmin){
+    modBtn.style.display = 'block';
+    if(modBtn.classList.contains('active')) renderAdminList();
+  } else {
+    if(modBtn.classList.contains('active')){
+      modBtn.classList.remove('active');
+      $('#tabview-mod').classList.remove('active');
+      $all('.view-tab')[0].classList.add('active');
+      $('#tabview-tasks').classList.add('active');
+    }
+    modBtn.style.display = 'none';
+  }
+}
+function renderRewardsTab(u){
+  const team = u.teamId ? teams[u.teamId] : null;
+  const panel = $('#teamPanel');
+  if(team){
+    panel.style.display = 'block';
+    $('#teamPanelName').textContent = teamDisplayName(team);
+    const total = team.members.reduce((s,mid)=> s + (users[mid] ? personalScore(users[mid]) : 0), 0);
+    $('#teamPoolScore').textContent = 'общее кол-во баллов: ' + round1(total);
+    const mwrap = $('#teamMembersDisplay'); mwrap.innerHTML = '';
+    team.members.forEach(mid => {
+      const m = users[mid];
+      const chip = document.createElement('div');
+      chip.className = 'team-member-chip' + (mid === u.id ? ' me' : '');
+      chip.textContent = (m ? m.name : '?') + (mid===u.id ? ' (ты)' : '') + ' · ' + (m ? personalScore(m) : 0);
+      mwrap.appendChild(chip);
+    });
+    if(team.members.length < team.size){
+      const empty = document.createElement('div');
+      empty.className = 'team-member-chip'; empty.style.opacity = '0.5'; empty.textContent = '+ свободное место';
+      mwrap.appendChild(empty);
+    }
+  } else { panel.style.display = 'none'; }
+}
+const MOBILE_ITEM = 78;
+const ORB_W = 60;
+const GAP_X = 24;
+const GAP_Y = 54;
+const BAND_GAP = 82;
+const JITTER_X = 9;
+const JITTER_Y = 7;
+const WIDE_BREAKPOINT = 860;
+const SPHERE_BASE_X = { tvorenie: 15, dvizhenie: 50, slovo: 85 };
+const WIDE_TREE_BAND = 320;
+const WIDE_NODE_RESERVE = 258;
+const WIDE_ROW_H = 200;
+const WIDE_ZIGZAG = 96;
+function renderTaskTree(u){
+  const wrap = $('#taskTree'); wrap.innerHTML = '';
+  const byDepth = {};
+  
+  // 1. Вычисляем текущий прогресс (самую глубокую ветку, куда мы дошли)
+  let activeDepth = 0;
+  TASK_ORDER.forEach(id => {
+    const t = ALL_TASKS.find(x => x.id === id);
+    if(!t) return;
+    const d = taskDepth(id);
+    // Если задание доступно ИЛИ мы уже отправили по нему отчёт, обновляем наш максимум
+    if (isTaskUnlockedByDeps(u, t) || getTaskState(u, t).status !== 'none') {
+      activeDepth = Math.max(activeDepth, d);
+    }
+  });
+
+  // 2. Формируем список только из тех заданий, куда мы дошли + 1 закрытый уровень в тумане
+  TASK_ORDER.forEach(id => {
+    const t = ALL_TASKS.find(x => x.id === id);
+    if(!t) return;
+    const d = taskDepth(id);
+    
+    // Всё, что лежит глубже одного неизвестного шага, вообще не рендерится
+    if (d <= activeDepth + 1) {
+      (byDepth[d] = byDepth[d] || []).push(t);
+    }
+  });
+
+  const depths = Object.keys(byDepth).map(Number).sort((a,b) => a-b);
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'tree-lines');
+  wrap.appendChild(svg);
+
+  const containerWidth = Math.max(280, wrap.clientWidth || wrap.getBoundingClientRect().width || 900);
+  const nodeEls = {};
+
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const useWide = containerWidth >= WIDE_BREAKPOINT && !(isTouchDevice && containerWidth < 1024);
+
+  if(useWide){
+    renderWideChaoticTree(u, wrap, byDepth, depths, containerWidth, nodeEls);
+  } else {
+    renderCompactSafeTree(u, wrap, byDepth, depths, containerWidth, nodeEls);
+  }
+
+  requestAnimationFrame(() => drawTreeLines(u, svg, wrap, nodeEls));
+  
+  // 3. Накладываем густой туман на дно, чтобы ветки красиво обрывались в пустоту
+  const bottomFog = document.createElement('div');
+  bottomFog.className = 'tree-bottom-fog';
+  wrap.appendChild(bottomFog);
+}
+/* Десктоп: узлы одного уровня раскладываются по трём "коридорам" сфер (лево/центр/право),
+   внутри коридора расходятся в несколько строк и слегка зигзагом вверх/вниз —
+   так дерево тянется вширь по бокам ноутбука, а не ужимается в один плотный ряд. */
+/* Десктоп: узлы каждого уровня раскладываются РЯДАМИ ПО ЦЕНТРУ и на всю ширину
+   контейнера — как на широком устройстве, а не тремя коридорами по бокам. */
+function renderWideChaoticTree(u, wrap, byDepth, depths, containerWidth, nodeEls){
+  let cursorY = 46;
+  depths.forEach((d, depthIndex) => { // ДОБАВИЛИ depthIndex сюда
+    const list = byDepth[d];
+    const cardStep   = WIDE_NODE_RESERVE;                       
+    const usableWidth = Math.max(0, containerWidth - cardStep); 
+    const perRow     = Math.max(1, Math.floor(usableWidth / cardStep) + 1);
+    let maxRows = 1;
+
+    list.forEach((task, i) => {
+      const row        = Math.floor(i / perRow);
+      const rowStart   = row * perRow;
+      const countInRow = Math.min(perRow, list.length - rowStart);
+      const idxInRow   = i - rowStart;
+
+      const step     = countInRow > 1 ? Math.min(cardStep, usableWidth / (countInRow - 1)) : 0;
+      const rowWidth = step * (countInRow - 1);
+      const startX   = (containerWidth - rowWidth) / 2;
+      const targetX  = startX + idxInRow * step + jitter(task.id + 'wx', 10);
+
+      const half = cardStep / 2;
+      const leftPx = Math.min(containerWidth - half, Math.max(half, targetX));
+
+      const zigParity = (idxInRow % 2 === 0) ? -1 : 1;
+      const zigMag    = countInRow > 1 ? WIDE_ZIGZAG * (0.4 + 0.6 * (idxInRow % 3) / 2) : 0;
+      const zigOffset = zigParity * zigMag;
+
+      const topPx = cursorY + row * WIDE_ROW_H + zigOffset + jitter(task.id + 'wy', 10);
+      const unlocked = isTaskUnlockedByDeps(u, task);
+
+      const outer = document.createElement('div');
+      outer.className = 'tree-node-wrap';
+      outer.style.left = leftPx + 'px';
+      outer.style.top  = topPx + 'px';
+      outer.style.transform = 'translateX(-50%)';
+      outer.appendChild(unlocked ? renderTaskNodeCard(u, task) : renderLockedOrb(task));
+      wrap.appendChild(outer);
+      nodeEls[task.id] = outer;
+
+      maxRows = Math.max(maxRows, row + 1);
+    });
+
+    // ИСПРАВЛЕНИЕ: Огромный отступ добавляем ТОЛЬКО если это не последний ряд!
+    if (depthIndex < depths.length - 1) {
+      cursorY += WIDE_TREE_BAND + (maxRows - 1) * WIDE_ROW_H + WIDE_ZIGZAG;
+    } else {
+      cursorY += (maxRows - 1) * WIDE_ROW_H + WIDE_ZIGZAG + 200; 
+    }
+  });
+  wrap.style.height = cursorY + 'px'; // Убрали лишние прибавки
+}
+function renderCompactSafeTree(u, wrap, byDepth, depths, containerWidth, nodeEls){
+  const usableWidth = Math.max(MOBILE_ITEM, containerWidth - 12);
+  let cursorY = 30;
+  depths.forEach((d, depthIndex) => { // ДОБАВИЛИ depthIndex сюда
+    const list = byDepth[d];
+    const widths = list.map(task => isTaskUnlockedByDeps(u, task) ? MOBILE_ITEM : ORB_W);
+    const shelves = [];
+    let shelf = [], shelfWidth = 0;
+    list.forEach((task, i) => {
+      const w = widths[i];
+      const addW = w + (shelf.length ? GAP_X : 0);
+      if(shelf.length && shelfWidth + addW > usableWidth){
+        shelves.push(shelf);
+        shelf = []; shelfWidth = 0;
+      }
+      shelf.push({ task, w });
+      shelfWidth += (shelf.length > 1 ? GAP_X : 0) + w;
+    });
+    if(shelf.length) shelves.push(shelf);
+
+    shelves.forEach((row, ri) => {
+      const totalW = row.reduce((s, it) => s + it.w, 0) + GAP_X * (row.length - 1);
+      let cx = Math.max(0, (containerWidth - totalW) / 2);
+      const rowTopBase = cursorY + ri * (MOBILE_ITEM + GAP_Y);
+      row.forEach(({ task, w }) => {
+        const unlocked = isTaskUnlockedByDeps(u, task);
+        const jx = jitter(task.id + 'x', JITTER_X);
+        const jy = jitter(task.id + 'y', JITTER_Y);
+        const leftPx = Math.min(containerWidth - w, Math.max(0, cx + jx));
+        const topPx = rowTopBase + jy;
+        const outer = document.createElement('div');
+        outer.className = 'tree-node-wrap';
+        outer.style.left = leftPx + 'px';
+        outer.style.top = topPx + 'px';
+        outer.appendChild(unlocked ? renderTaskNodeOrb(u, task) : renderLockedOrb(task));
+        wrap.appendChild(outer);
+        nodeEls[task.id] = outer;
+        cx += w + GAP_X;
+      });
+    });
+
+    // ИСПРАВЛЕНИЕ: Большой отступ (BAND_GAP) только между уровнями
+    if (depthIndex < depths.length - 1) {
+      cursorY += shelves.length * (MOBILE_ITEM + GAP_Y) + BAND_GAP;
+    } else {
+      cursorY += shelves.length * (MOBILE_ITEM + GAP_Y) + 60;
+    }
+  });
+  wrap.style.height = cursorY + 'px'; // Убрали лишние прибавки
+}
+function renderLockedOrb(task){
+  const sphere = SPHERES[task.sphere];
+  const orb = document.createElement('div');
+  orb.className = 'locked-orb';
+  orb.innerHTML = '<div class="fogpatch"></div><span class="lo-icon">'+sphere.icon+'</span>';
+  orb.addEventListener('click', () => toast('Скрыто туманом — выполни предыдущее задание, чтобы это открылось'));
+  return orb;
+}
+function renderTaskNodeOrb(u, task){
+  const state = getTaskState(u, task);
+  const sphere = SPHERES[task.sphere];
+  const finalPts = computeFinalPts(u, task);
+  const orb = document.createElement('div');
+  orb.className = 'task-node-orb state-' + state.status;
+  orb.dataset.taskId = task.id;
+  orb.addEventListener('click', () => openTaskModal(u, task));
+  orb.innerHTML =
+    '<span class="tno-icon">'+sphere.icon+'</span>'
+    + '<span class="tno-pts">'+finalPts+'</span>'
+    + (task.team ? '<span class="tno-team">К</span>' : '');
+  return orb;
+}
+function renderTaskNodeCard(u, task){
+  const state = getTaskState(u, task);
+  const sphere = SPHERES[task.sphere];
+  const finalPts = computeFinalPts(u, task);
+  const isBuff = finalPts !== task.pts;
+  const statusLabel = { none:'ждёт отчёта', pending:'на проверке', approved:'принято', rejected:'отклонено' }[state.status];
+  const card = document.createElement('div');
+  card.className = 'task-node-card state-' + state.status;
+  card.dataset.taskId = task.id;
+  card.addEventListener('click', () => openTaskModal(u, task));
+  card.innerHTML =
+    '<div class="tnc-top"><div class="tnc-icon">'+sphere.icon+'</div><div class="tnc-name">'+escapeHtml(task.name)+'</div></div>'
+    + '<div class="tnc-req">'+escapeHtml(task.req)+'</div>'
+    + '<div class="tnc-bottom"><span class="tnc-pts">'+task.pts+(isBuff ? ' → <b>'+finalPts+'</b>' : '')+'</span><span class="tnc-status">'+statusLabel+'</span></div>'
+    + (task.team ? '<span class="tnc-team">команда</span>' : '');
+  return card;
+}
+function drawTreeLines(u, svg, container, nodeEls){
+  const crect = container.getBoundingClientRect();
+  svg.setAttribute('width', container.scrollWidth);
+  svg.setAttribute('height', container.scrollHeight);
+  svg.innerHTML = '';
+  const svgNS = 'http://www.w3.org/2000/svg';
+  TASK_ORDER.forEach(taskId => {
+    const dep = TASK_DEPENDS[taskId];
+    if(!dep) return;
+    const ids = dep.any || dep.all || [];
+    ids.forEach(pid => {
+      const parentWrap = nodeEls[pid], childWrap = nodeEls[taskId];
+      if(!parentWrap || !childWrap) return;
+      const pr = parentWrap.getBoundingClientRect(), cr = childWrap.getBoundingClientRect();
+      const x1 = pr.left + pr.width/2 - crect.left, y1 = pr.bottom - crect.top;
+      const x2 = cr.left + cr.width/2 - crect.left, y2 = cr.top - crect.top;
+      const midY = (y1 + y2) / 2;
+      const path = document.createElementNS(svgNS, 'path');
+      path.setAttribute('d', 'M'+x1+','+y1+' C'+x1+','+midY+' '+x2+','+midY+' '+x2+','+y2);
+      const parentTask = ALL_TASKS.find(t => t.id === pid);
+      const active = parentTask && getTaskState(u, parentTask).status === 'approved';
+      path.setAttribute('class', 'tree-edge' + (active ? ' active' : ''));
+      svg.appendChild(path);
+      if(active){
+        const spark = document.createElementNS(svgNS, 'circle');
+        spark.setAttribute('cx', x1); spark.setAttribute('cy', y1); spark.setAttribute('r', '2.8');
+        spark.setAttribute('class', 'tree-edge-spark');
+        svg.appendChild(spark);
+      }
+    });
+  });
+}
+let treeResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(treeResizeTimer);
+  treeResizeTimer = setTimeout(() => { const u = currentUser(); if(u && $('#tabview-tasks').classList.contains('active')) renderTaskTree(u); }, 220);
+});
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => { const u = currentUser(); if(u && $('#tabview-tasks').classList.contains('active')) renderTaskTree(u); }, 320);
+});
+function renderEditableForm(state){
+  return ''
+    + '<div class="field"><label>Ответ / описание отчёта</label>'
+    + '<textarea id="modalAnswer" rows="4" placeholder="Опиши, как выполнил задание...">'+escapeHtml(state.answer||'')+'</textarea></div>'
+    + '<div class="field"><label>Фото (необязательно)</label>'
+    + '<input type="file" id="modalImage" accept="image/*">'
+    + (state.image ? '<div style="margin-top:10px;"><img src="'+state.image+'" class="img-preview"></div><p class="field-hint">Если не выберешь новое фото — сохранится прежнее.</p>' : '')
+    + '<p class="field-hint">Можно приложить фото задания. Очень большие файлы могут не сохраниться в браузере.</p></div>'
+    + '<button class="btn btn-primary" id="btnSubmitTask">'+(state.status==='rejected' ? 'Отправить заново' : 'Отправить в туман')+'</button>';
+}
+function renderModalContent(u, task){
+  const state = getTaskState(u, task);
+  const sphere = SPHERES[task.sphere];
+  const finalPts = computeFinalPts(u, task);
+  const isBuff = finalPts !== task.pts;
+  let statusArea = '';
+  if(state.status === 'pending'){
+    statusArea = ''
+      + '<div class="submission-view">'
+      + (state.image ? '<img src="'+state.image+'" class="img-preview">' : '')
+      + '<p class="lore-text">'+escapeHtml(state.answer||'(без текста)')+'</p></div>'
+      + '<p class="status-note pending">Туман изучает твой отчёт... жди решения хранителей.</p>'
+      + '<button class="btn btn-ghost" id="btnWithdraw">Отозвать и изменить</button>';
+  } else if(state.status === 'approved'){
+    statusArea = ''
+      + '<div class="submission-view">'
+      + (state.image ? '<img src="'+state.image+'" class="img-preview">' : '')
+      + '<p class="lore-text">'+escapeHtml(state.answer||'(без текста)')+'</p></div>'
+      + '<p class="status-note approved">Задание принято. Получено баллов: <b>'+finalPts+'</b></p>';
+  } else if(state.status === 'rejected'){
+    statusArea = '<p class="status-note rejected">Отклонено: '+escapeHtml(state.reason||'без указания причины')+'</p>' + renderEditableForm(state);
+  } else {
+    statusArea = renderEditableForm(state);
+  }
+  $('#taskModalBody').innerHTML = ''
+    + '<div class="modal-head"><div class="modal-icon">'+sphere.icon+'</div><div>'
+    + '<div class="modal-eyebrow">'+sphere.name+' · уровень '+(task.level+1)+' · '+(task.team?'командное':'личное')+'</div>'
+    + '<h3 class="display modal-title">'+escapeHtml(task.name)+'</h3></div></div>'
+    + '<p class="lore-text muted modal-req">'+escapeHtml(task.req)+'</p>'
+    + '<div class="modal-points">баллы: '+task.pts+(isBuff ? ' → <b>'+finalPts+'</b> (бафф тумана)' : '')+(task.team ? ' · отчёт один на всю команду' : '')+'</div>'
+    + statusArea;
+  const submitBtn = $('#btnSubmitTask');
+  if(submitBtn) submitBtn.addEventListener('click', () => handleSubmitTask(u, task));
+  const withdrawBtn = $('#btnWithdraw');
+  if(withdrawBtn) withdrawBtn.addEventListener('click', () => handleWithdraw(u, task));
+}
+function openTaskModal(u, task){
+  currentModalUser = u; currentModalTask = task;
+  renderModalContent(u, task);
+  $('#taskModalBackdrop').classList.add('open');
+}
+function closeTaskModal(){
+  $('#taskModalBackdrop').classList.remove('open');
+  currentModalUser = null; currentModalTask = null;
+}
+$('#modalCloseBtn').addEventListener('click', closeTaskModal);
+$('#taskModalBackdrop').addEventListener('click', (e) => { if(e.target.id === 'taskModalBackdrop') closeTaskModal(); });
+function handleSubmitTask(u, task){
+  const answerEl = document.getElementById('modalAnswer');
+  const fileEl = document.getElementById('modalImage');
+  const answer = answerEl ? answerEl.value.trim() : '';
+  const existing = getTaskState(u, task);
+  const file = fileEl && fileEl.files && fileEl.files[0];
+  if(!answer && !file && !existing.image){ toast('Добавь описание или фото отчёта'); return; }
+  function finalize(imageData){
+    const state = {
+      status: 'pending', answer: answer,
+      image: imageData !== undefined ? imageData : (existing.image || null),
+      reason: null, submittedBy: u.name, submittedAt: Date.now()
+    };
+    setTaskState(u, task, state);
+    toast('Отчёт отправлен в туман...');
+    closeTaskModal();
+    renderDashboard();
+  }
+  if(file){
+    const reader = new FileReader();
+    reader.onload = () => finalize(reader.result);
+    reader.onerror = () => { toast('Не удалось прочитать файл'); finalize(undefined); };
+    reader.readAsDataURL(file);
+  } else { finalize(undefined); }
+}
+function handleWithdraw(u, task){
+  const state = getTaskState(u, task);
+  state.status = 'none';
+  setTaskState(u, task, state);
+  renderModalContent(u, task);
+  renderDashboard();
+}
+function collectSubmissions(){
+  const out = [];
+  ALL_TASKS.forEach(task => {
+    if(task.team){
+      Object.keys(teamProgress).forEach(teamId => {
+        const st = teamProgress[teamId] && teamProgress[teamId][task.id];
+        if(st && st.status !== 'none'){
+          const team = teams[teamId];
+          const label = team ? teamDisplayName(team) + ' (' + team.members.map(mid => users[mid] ? users[mid].name : '?').join(', ') + ')' : teamId;
+          out.push({ task, state: st, ownerType:'team', ownerId: teamId, label });
+        }
+      });
+    } else {
+      Object.keys(progress).forEach(uid => {
+        const st = progress[uid] && progress[uid][task.id];
+        if(st && st.status !== 'none'){
+          const uu = users[uid];
+          const label = (uu ? uu.name : '?') + ' (ID ' + uid + ')';
+          out.push({ task, state: st, ownerType:'user', ownerId: uid, label });
+        }
+      });
+    }
+  });
+  out.sort((a,b) => (b.state.submittedAt||0) - (a.state.submittedAt||0));
+  return out;
+}
+function renderAdminList(){
+  const list = $('#adminList'); if(!list) return;
+  list.innerHTML = '';
+  const subs = collectSubmissions().filter(s => adminFilter === 'all' ? true : s.state.status === adminFilter);
+  if(!subs.length){ list.innerHTML = '<p class="empty-hint">Здесь пока пусто.</p>'; return; }
+  subs.forEach(s => {
+    const sphere = SPHERES[s.task.sphere];
+    const entry = document.createElement('div');
+    entry.className = 'admin-entry';
+    let actionsHtml;
+    if(s.state.status === 'pending'){
+      actionsHtml = '<div class="admin-entry-actions"><button class="btn-approve" data-act="approve">Принять</button><button class="btn-reject" data-act="reject">Отклонить</button></div>';
+    } else {
+      const tag = { approved: 'принято', rejected: 'отклонено' }[s.state.status] || '';
+      actionsHtml = '<span class="admin-decided-tag ' + s.state.status + '">' + tag + '</span>';
+    }
+    entry.innerHTML = ''
+      + '<div class="admin-entry-top"><div class="admin-entry-who">'+escapeHtml(s.label)+'</div>'
+      + '<div class="admin-entry-task mono">'+sphere.icon+' '+escapeHtml(s.task.name)+' · ур.'+(s.task.level+1)+' · '+s.task.pts+' б.'+(s.task.team?' · команда':'')+'</div></div>'
+      + '<div class="admin-entry-body">'
+      + (s.state.image ? '<img src="'+s.state.image+'" class="img-preview">' : '')
+      + (s.state.answer ? escapeHtml(s.state.answer) : '<i>без текста</i>')
+      + '</div>'
+      + (s.state.status === 'rejected' ? '<div class="status-note rejected">Причина: '+escapeHtml(s.state.reason||'—')+'</div>' : '')
+      + actionsHtml;
+    const approveBtn = entry.querySelector('[data-act="approve"]');
+    const rejectBtn = entry.querySelector('[data-act="reject"]');
+    if(approveBtn) approveBtn.addEventListener('click', () => adminDecide(s, 'approved'));
+    if(rejectBtn) rejectBtn.addEventListener('click', () => adminDecide(s, 'rejected'));
+    list.appendChild(entry);
+  });
+}
+function adminDecide(s, decision){
+  let reason = null;
+  if(decision === 'rejected'){
+    reason = window.prompt('Причина отклонения (можно оставить пустым):', '');
+    if(reason === null) return;
+    if(!reason.trim()) reason = 'Уточни отчёт и отправь снова.';
+  }
+  s.state.status = decision;
+  s.state.reason = decision === 'rejected' ? reason : null;
+  s.state.decidedAt = Date.now();
+  if(s.ownerType === 'team'){ teamProgress[s.ownerId][s.task.id] = s.state; saveTeamProgress(); }
+  else { progress[s.ownerId][s.task.id] = s.state; saveProgress(); }
+  toast(decision === 'approved' ? 'Задание принято' : 'Задание отклонено');
+  renderAdminList();
+  renderDashboard();
+}
+function renderLore(day){
+  const wrap = $('#loreWrap'); wrap.innerHTML = '';
+  const introBlock = document.createElement('div');
+  introBlock.className = 'lore-day-block';
+  introBlock.innerHTML = '<div class="lore-day-title">Легенда о тумане</div><div class="lore-entry">'+LORE_INTRO+'</div>';
+  wrap.appendChild(introBlock);
+  LORE.forEach(entry => {
+    const unlocked = day >= entry.day;
+    const block = document.createElement('div');
+    block.className = 'lore-day-block';
+    block.innerHTML = '<div class="lore-day-title">'+entry.title+' <span class="mono" style="opacity:.6;">(день '+entry.day+')</span></div>';
+    const box = document.createElement('div');
+    box.className = 'lore-entry' + (unlocked ? '' : ' locked');
+    box.innerHTML = unlocked ? entry.text : '<div class="fogpatch"></div>Эта страница ещё скрыта туманом — вернись, когда наступит '+entry.day+'-й день события.';
+    block.appendChild(box);
+    wrap.appendChild(block);
+  });
+}
+syncTasksFromSheet();
+(function init(){
+  if(session.userId && users[session.userId]){
+    const u = users[session.userId];
+    $('#inputName').value = u.name; $('#inputId').value = u.id;
+    routeAfterLogin();
+  }
+})();
+})();
+</script>
+</body>
+</html>
