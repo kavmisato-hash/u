@@ -2217,3 +2217,12 @@ input[type=file].visually-hidden {
     padding: 9px 10px 7px;
   }
 }
+
+.result-icon img,
+.story-icon img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+  display: block;
+  filter: invert(72%) sepia(28%) saturate(700%) hue-rotate(357deg) brightness(92%) contrast(88%);
+}
