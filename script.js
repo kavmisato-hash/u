@@ -599,10 +599,23 @@
       const t = ALL_TASKS.find(x => x.id === id);
       if (!t) return;
       if (!showCompleted && getTaskState(u, t).status === 'approved') return;
+
       const d = taskDepth(id);
-      if (d <= activeDepth + 1) {
-        (byDepth[d] = byDepth[d] || []).push(t);
+      if (d > activeDepth + 1) return;
+
+      if (d === activeDepth + 1) {
+        const dep = TASK_DEPENDS[id];
+        if (dep) {
+          const parentIds = dep.any || dep.all || [];
+          const parentVisible = parentIds.some(pid => {
+            const pt = ALL_TASKS.find(x => x.id === pid);
+            return pt && isTaskUnlockedByDeps(u, pt);
+          });
+          if (!parentVisible) return;
+        }
       }
+
+      (byDepth[d] = byDepth[d] || []).push(t);
     });
 
     const depths = Object.keys(byDepth).map(Number).sort((a, b) => a - b);
@@ -622,64 +635,53 @@
   }
 
   function renderCompactTree(u, wrap, byDepth, depths, containerWidth, nodeEls) {
-    const ITEM = MOBILE_ITEM;
+    const CELL = MOBILE_ITEM;
     const GX = GAP_X;
     const GY = GAP_Y;
-    const usableWidth = Math.max(ITEM, containerWidth - 24);
+
+    const usableWidth = Math.max(CELL, containerWidth - 24);
+    const perRow = Math.max(1, Math.floor((usableWidth + GX) / (CELL + GX)));
+
     let cursorY = 40;
 
     depths.forEach((d, depthIndex) => {
       const list = byDepth[d];
-      const widths = list.map(task => isTaskUnlockedByDeps(u, task) ? ITEM : ORB_W);
-      const shelves = [];
-      let shelf = [], shelfWidth = 0;
+      const rows = [];
+      for (let i = 0; i < list.length; i += perRow) {
+        rows.push(list.slice(i, i + perRow));
+      }
 
-      list.forEach((task, i) => {
-        const w = widths[i];
-        const addW = w + (shelf.length ? GX : 0);
-        if (shelf.length && shelfWidth + addW > usableWidth) {
-          shelves.push(shelf);
-          shelf = [];
-          shelfWidth = 0;
-        }
-        shelf.push({ task: task, w: w });
-        shelfWidth += (shelf.length > 1 ? GX : 0) + w;
-      });
-      if (shelf.length) shelves.push(shelf);
+      let rowY = cursorY;
+      rows.forEach(rowItems => {
+        const countInRow = rowItems.length;
+        const rowWidth = countInRow * CELL + (countInRow - 1) * GX;
+        const startX = Math.max(0, (containerWidth - rowWidth) / 2);
 
-      let globalIdx = 0;
-      shelves.forEach((row) => {
-        const totalW = row.reduce((s, it) => s + it.w, 0) + GX * (row.length - 1);
-        const rowWidth = Math.min(totalW, usableWidth);
-        const baseCx = Math.max(0, (containerWidth - rowWidth) / 2);
-        const maxW = Math.max.apply(null, row.map(it => it.w));
-
-        row.forEach((item) => {
-          const task = item.task, w = item.w;
+        let x = startX;
+        rowItems.forEach((task) => {
           const unlocked = isTaskUnlockedByDeps(u, task);
           const jx = jitter(task.id + 'x', JITTER_X);
           const jy = jitter(task.id + 'y', JITTER_Y);
 
-          const zigX = (globalIdx % 2 === 0 ? -30 : 30);
-          const zigY = (globalIdx % 2 === 0 ? -12 : 12);
-          globalIdx++;
-
-          const leftPx = Math.min(containerWidth - w, Math.max(0, baseCx + jx + zigX));
-          const topPx = cursorY + jy + zigY;
-
           const outer = document.createElement('div');
           outer.className = 'tree-node-wrap';
-          outer.style.left = leftPx + 'px';
-          outer.style.top = topPx + 'px';
+          outer.style.left = (x + CELL / 2 + jx) + 'px';
+          outer.style.top = (rowY + jy) + 'px';
+          outer.style.width = CELL + 'px';
+          outer.style.transform = 'translateX(-50%)';
+
           outer.appendChild(unlocked ? renderTaskNodeOrb(u, task) : renderLockedOrb(task));
+
           wrap.appendChild(outer);
           nodeEls[task.id] = outer;
+
+          x += CELL + GX;
         });
 
-        cursorY += maxW + GY + 24;
+        rowY += CELL + GY;
       });
 
-      cursorY += (depthIndex < depths.length - 1 ? BAND_GAP : 20);
+      cursorY = rowY + (depthIndex < depths.length - 1 ? BAND_GAP : 20);
     });
 
     wrap.style.height = cursorY + 'px';
@@ -688,8 +690,6 @@
   function renderWideTree(u, wrap, byDepth, depths, containerWidth, nodeEls) {
     const CARD_W = 240;
     const CARD_H = 190;
-    const ORB_W = 60;
-    const ORB_H = 60;
     const GAP_X = 28;
     const GAP_Y = 44;
     const ZIGZAG = 40;
@@ -700,59 +700,43 @@
     depths.forEach((d, depthIndex) => {
       const list = byDepth[d];
 
-      const items = list.map(task => {
-        const unlocked = isTaskUnlockedByDeps(u, task);
-        return {
-          task: task,
-          unlocked: unlocked,
-          w: unlocked ? CARD_W : ORB_W,
-          h: unlocked ? CARD_H : ORB_H
-        };
-      });
-
+      const perRow = Math.max(1, Math.floor((containerWidth + GAP_X) / (CARD_W + GAP_X)));
       const rows = [];
-      let row = [];
-      let rowW = 0;
-      items.forEach(item => {
-        const addW = item.w + (row.length ? GAP_X : 0);
-        if (row.length && rowW + addW > containerWidth) {
-          rows.push(row);
-          row = [item];
-          rowW = item.w;
-        } else {
-          row.push(item);
-          rowW += addW;
-        }
-      });
-      if (row.length) rows.push(row);
+      for (let i = 0; i < list.length; i += perRow) {
+        rows.push(list.slice(i, i + perRow));
+      }
 
       let rowY = cursorY;
       rows.forEach(rowItems => {
-        const rowWidth = rowItems.reduce((s, it) => s + it.w, 0) + GAP_X * (rowItems.length - 1);
+        const countInRow = rowItems.length;
+        const rowWidth = countInRow * CARD_W + (countInRow - 1) * GAP_X;
         const startX = Math.max(0, (containerWidth - rowWidth) / 2);
-        const maxH = Math.max.apply(null, rowItems.map(it => it.h));
-        const hasCards = rowItems.some(it => it.unlocked);
-        const extraZig = hasCards ? ZIGZAG * 2 : 0;
 
         let x = startX;
-        rowItems.forEach((it, idx) => {
-          const zig = (hasCards && it.unlocked) ? (idx % 2 === 0 ? -1 : 1) * ZIGZAG : 0;
-          const leftPx = x + it.w / 2;
-          const topPx = rowY + zig;
+        rowItems.forEach((task, idx) => {
+          const unlocked = isTaskUnlockedByDeps(u, task);
+          const zig = (idx % 2 === 0 ? -1 : 1) * ZIGZAG;
 
           const outer = document.createElement('div');
           outer.className = 'tree-node-wrap';
-          outer.style.left = leftPx + 'px';
-          outer.style.top = topPx + 'px';
+          outer.style.left = (x + CARD_W / 2) + 'px';
+          outer.style.top = (rowY + zig) + 'px';
+          outer.style.width = CARD_W + 'px';
           outer.style.transform = 'translateX(-50%)';
-          outer.appendChild(it.unlocked ? renderTaskNodeCard(u, it.task) : renderLockedOrb(it.task));
-          wrap.appendChild(outer);
-          nodeEls[it.task.id] = outer;
 
-          x += it.w + GAP_X;
+          if (unlocked) {
+            outer.appendChild(renderTaskNodeCard(u, task));
+          } else {
+            outer.appendChild(renderLockedOrb(task));
+          }
+
+          wrap.appendChild(outer);
+          nodeEls[task.id] = outer;
+
+          x += CARD_W + GAP_X;
         });
 
-        rowY += maxH + GAP_Y + extraZig;
+        rowY += CARD_H + GAP_Y + ZIGZAG * 2;
       });
 
       cursorY = rowY + (depthIndex < depths.length - 1 ? BAND_GAP : 20);
@@ -810,8 +794,9 @@
     const svgNS = 'http://www.w3.org/2000/svg';
     const positions = {};
     Object.keys(nodeEls).forEach(id => {
-      const el = nodeEls[id];
-      const r = el.getBoundingClientRect();
+      const wrapEl = nodeEls[id];
+      const inner = wrapEl.querySelector('.task-node-card, .task-node-orb, .locked-orb') || wrapEl;
+      const r = inner.getBoundingClientRect();
       positions[id] = {
         cx: r.left + r.width / 2 - crect.left,
         top: r.top - crect.top,
@@ -999,16 +984,14 @@
     const day = getCurrentDay();
     const inWindow = isDailyInWindow(daily, day);
     let statusArea = '';
-    let windowNote = '';
 
     if (!inWindow && state.status === 'none') {
       const before = day < daily.dayFrom;
-      windowNote = '<p class="window-note closed">'
+      statusArea = '<p class="window-note closed">'
         + (before
             ? 'Задание откроется в день ' + daily.dayFrom + '. Сейчас день ' + day + '.'
             : 'Время отчёта по этому заданию истекло (дни ' + daily.dayFrom + '–' + daily.dayTo + ').')
         + '</p>';
-      statusArea = windowNote;
     } else if (state.status === 'none') {
       statusArea = ''
         + '<p class="window-note active">Открыто для отчёта: дни ' + daily.dayFrom + '–' + daily.dayTo + '. Сейчас день ' + day + '.</p>'
@@ -1272,15 +1255,63 @@
     attachImageZoom(list);
   }
 
-  function adminDecide(s, decision) {
-    let reason = null;
-    if (decision === 'rejected') {
-      reason = window.prompt('Причина отклонения (можно оставить пустым):', '');
-      if (reason === null) return;
-      if (!reason.trim()) reason = 'Уточни отчёт и отправь снова.';
+  let pendingRejectSubmission = null;
+
+  function openRejectModal(s) {
+    pendingRejectSubmission = s;
+    const subtitle = $('#rejectSubtitle');
+    if (subtitle) {
+      const taskName = s.kind === 'task' ? s.task.name : s.daily.name;
+      subtitle.textContent = s.label + ' · ' + taskName;
     }
-    s.state.status = decision;
-    s.state.reason = decision === 'rejected' ? reason : null;
+    const input = $('#rejectReasonInput');
+    if (input) input.value = '';
+    $('#rejectBackdrop').classList.add('open');
+    setTimeout(() => { if (input) input.focus(); }, 60);
+  }
+
+  function closeRejectModal() {
+    pendingRejectSubmission = null;
+    $('#rejectBackdrop').classList.remove('open');
+  }
+
+  function confirmReject() {
+    const s = pendingRejectSubmission;
+    if (!s) return;
+    const input = $('#rejectReasonInput');
+    let reason = input ? input.value.trim() : '';
+    if (!reason) reason = 'Уточни отчёт и отправь снова.';
+
+    s.state.status = 'rejected';
+    s.state.reason = reason;
+    s.state.decidedAt = Date.now();
+
+    if (s.kind === 'task') {
+      progress[s.ownerId][s.task.id] = s.state;
+      saveProgress();
+    } else {
+      const team = teams[s.teamId];
+      if (team) {
+        if (!team.dailies) team.dailies = {};
+        team.dailies[s.daily.id] = s.state;
+        saveTeams();
+      }
+    }
+
+    toast('Отклонено');
+    closeRejectModal();
+    renderAdminList();
+    renderDashboard();
+  }
+
+  function adminDecide(s, decision) {
+    if (decision === 'rejected') {
+      openRejectModal(s);
+      return;
+    }
+
+    s.state.status = 'approved';
+    s.state.reason = null;
     s.state.decidedAt = Date.now();
 
     if (s.kind === 'task') {
@@ -1294,9 +1325,32 @@
       saveTeams();
     }
 
-    toast(decision === 'approved' ? 'Принято' : 'Отклонено');
+    toast('Принято');
     renderAdminList();
     renderDashboard();
+  }
+
+  function bindRejectModal() {
+    const closeBtn = $('#rejectCloseBtn');
+    const cancelBtn = $('#rejectCancelBtn');
+    const confirmBtn = $('#rejectConfirmBtn');
+    const backdrop = $('#rejectBackdrop');
+
+    if (closeBtn) closeBtn.addEventListener('click', closeRejectModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeRejectModal);
+    if (confirmBtn) confirmBtn.addEventListener('click', confirmReject);
+
+    if (backdrop) {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target.id === 'rejectBackdrop') closeRejectModal();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && backdrop && backdrop.classList.contains('open')) {
+        closeRejectModal();
+      }
+    });
   }
 
   function renderTeamPanel(u) {
@@ -1648,6 +1702,7 @@
     bindTabs();
     bindAdmin();
     bindModal();
+    bindRejectModal();
 
     updateToggleDoneBtn();
     updateShuffleBtn();
