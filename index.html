@@ -157,16 +157,10 @@
           <span class="st-pending"><i></i>отправлен отчёт</span>
           <span class="st-approved"><i></i>принято</span>
         </div>
-        <div class="tasks-toolbar-actions">
-          <button class="btn-toggle-done" id="btnShuffle" title="Перетасовать порядок заданий">
-            <span class="btn-toggle-done-icon">⟳</span>
-            <span class="btn-shuffle-text">Перетасовать · осталось 3</span>
-          </button>
-          <button class="btn-toggle-done" id="btnToggleDone" data-state="shown">
-            <span class="btn-toggle-done-icon">−</span>
-            <span class="btn-toggle-done-text">Скрыть выполненные</span>
-          </button>
-        </div>
+        <button class="btn-toggle-done" id="btnToggleDone" data-state="shown">
+          <span class="btn-toggle-done-icon">−</span>
+          <span class="btn-toggle-done-text">Скрыть выполненные</span>
+        </button>
       </div>
       <div class="skill-map" id="taskTree"></div>
     </div>
@@ -199,6 +193,28 @@
 <div class="image-viewer" id="imageViewer">
   <button class="image-viewer-close" id="imageViewerClose">✕</button>
   <img id="imageViewerImg" src="" alt="">
+</div>
+<div class="reject-backdrop" id="rejectBackdrop">
+  <div class="reject-modal">
+    <button class="modal-close" id="rejectCloseBtn">✕</button>
+    <div class="modal-head">
+      <div class="modal-icon" style="color: var(--err); border-color: var(--err);">✕</div>
+      <div>
+        <div class="modal-eyebrow">хранитель тумана</div>
+        <h3 class="display modal-title" style="color: var(--err);">Отклонить отчёт</h3>
+      </div>
+    </div>
+    <p class="lore-text muted" style="margin-bottom:14px;" id="rejectSubtitle">—</p>
+    <div class="field">
+      <label>Причина отклонения</label>
+      <textarea id="rejectReasonInput" rows="3" placeholder="Уточни отчёт и отправь снова."></textarea>
+      <p class="field-hint">Можно оставить пустым — подставится стандартная причина.</p>
+    </div>
+    <div class="reject-actions">
+      <button class="btn btn-ghost" id="rejectCancelBtn">Отмена</button>
+      <button class="btn btn-primary" id="rejectConfirmBtn" style="background: var(--err); border-color: var(--err);">Отклонить</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
