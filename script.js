@@ -35,7 +35,7 @@
 
   const PATHS = {
     likotvorcy: {
-      name: 'Ликотворцы', icon: MASK_ICON_SVG, buffSphere: 'tvorenie',
+      name: 'Ликотворцы', icon: '<img src="png/3681529.png" alt="">', buffSphere: 'tvorenie',
       lore: 'Их лики скрыты, а взгляд избегает чужих глаз. Ликотворцы сторонятся заводей и оживлённых троп, предпочитая тишину своего шатра. Денно и нощно они лепят, коптят и разукрашивают маски — и верят, что именно маска убережёт от подкрадывающейся нечисти. Работу сопровождают тихие молитвы. Стоит почувствовать холодок по коже — тушат огонь и сыплют соль у порога.'
     },
     ratniki: {
@@ -452,11 +452,27 @@
     const isBuff = path && path.buffSphere === task.sphere;
     return isBuff ? round1(task.pts * BUFF_MULT) : task.pts;
   }
+
+    function teamDailyBonusFor(u) {
+    if (!u || !u.teamId) return 0;
+    const team = teams[u.teamId];
+    if (!team) return 0;
+    let sum = 0;
+    TEAM_DAILIES.forEach(d => {
+      const st = getDailyState(team, d.id);
+      if (st.status === 'approved') sum += d.pts;
+    });
+    return sum;
+  }
+
   function personalScore(u) {
-    return round1(ALL_TASKS.reduce((s, t) => {
+    let sum = 0;
+    ALL_TASKS.forEach(t => {
       const st = getTaskState(u, t);
-      return s + (st.status === 'approved' ? computeFinalPts(u, t) : 0);
-    }, 0));
+      if (st.status === 'approved') sum += computeFinalPts(u, t);
+    });
+    sum += teamDailyBonusFor(u);
+    return round1(sum);
   }
 
   function getDailyState(team, dailyId) {
@@ -634,7 +650,7 @@
     requestAnimationFrame(() => drawTreeLines(u, svg, wrap, nodeEls));
   }
 
-  function renderCompactTree(u, wrap, byDepth, depths, containerWidth, nodeEls) {
+    function renderCompactTree(u, wrap, byDepth, depths, containerWidth, nodeEls) {
     const CELL = MOBILE_ITEM;
     const GX = GAP_X;
     const GY = GAP_Y;
@@ -652,6 +668,8 @@
       }
 
       let rowY = cursorY;
+      let globalIdx = 0;
+
       rows.forEach(rowItems => {
         const countInRow = rowItems.length;
         const rowWidth = countInRow * CELL + (countInRow - 1) * GX;
@@ -660,13 +678,20 @@
         let x = startX;
         rowItems.forEach((task) => {
           const unlocked = isTaskUnlockedByDeps(u, task);
-          const jx = jitter(task.id + 'x', JITTER_X);
-          const jy = jitter(task.id + 'y', JITTER_Y);
+
+          const jx = jitter(task.id + 'mx', 14);
+          const jy = jitter(task.id + 'my', 16);
+
+          const zigX = (globalIdx % 2 === 0 ? -20 : 20) * (0.4 + 0.6 * ((globalIdx + 1) % 3) / 2);
+          const zigY = (globalIdx % 3 === 0 ? -14 : globalIdx % 3 === 1 ? 8 : 18);
+
+          const leftPx = Math.min(containerWidth - CELL / 2, Math.max(CELL / 2, x + CELL / 2 + jx + zigX));
+          const topPx = rowY + jy + zigY;
 
           const outer = document.createElement('div');
           outer.className = 'tree-node-wrap';
-          outer.style.left = (x + CELL / 2 + jx) + 'px';
-          outer.style.top = (rowY + jy) + 'px';
+          outer.style.left = leftPx + 'px';
+          outer.style.top = topPx + 'px';
           outer.style.width = CELL + 'px';
           outer.style.transform = 'translateX(-50%)';
 
@@ -676,9 +701,10 @@
           nodeEls[task.id] = outer;
 
           x += CELL + GX;
+          globalIdx++;
         });
 
-        rowY += CELL + GY;
+        rowY += CELL + GY + 40;
       });
 
       cursorY = rowY + (depthIndex < depths.length - 1 ? BAND_GAP : 20);
@@ -773,7 +799,7 @@
     const sphere = SPHERES[task.sphere];
     const finalPts = computeFinalPts(u, task);
     const isBuff = finalPts !== task.pts;
-    const statusLabel = { none:'ждёт отчёта', pending:'на проверке', approved:'принято', rejected:'отклонено' }[state.status];
+    const statusLabel = { none:'не начато', pending:'отправлено', approved:'принято', rejected:'отклонено' }[state.status];
     const card = document.createElement('div');
     card.className = 'task-node-card state-' + state.status;
     card.dataset.taskId = task.id;
@@ -959,7 +985,7 @@
 
     $('#taskModalBody').innerHTML = ''
       + '<div class="modal-head"><div class="modal-icon">' + sphere.icon + '</div><div>'
-      + '<div class="modal-eyebrow">' + sphere.name + ' · уровень ' + (task.level + 1) + '</div>'
+      + '<div class="modal-eyebrow">' + sphere.name + '</div>'
       + '<h3 class="display modal-title">' + escapeHtml(task.name) + '</h3></div></div>'
       + '<p class="lore-text muted modal-req">' + escapeHtml(task.req) + '</p>'
       + '<div class="modal-points">баллы: ' + task.pts + (isBuff ? ' → <b>' + finalPts + '</b> (бафф тумана)' : '') + '</div>'
@@ -1018,8 +1044,8 @@
         + '<span class="report-mode-tag">' + (state.reportMode === 'all' ? 'один за всех' : 'каждый свой') + '</span>'
         + (state.image ? '<img src="' + state.image + '" class="img-preview">' : '')
         + '<p class="lore-text">' + escapeHtml(state.answer || '(без текста)') + '</p></div>'
-        + '<p class="status-note approved">Принято. Команда получила <b>' + daily.pts + '</b> б.</p>';
-    } else if (state.status === 'rejected') {
+        + '<p class="status-note approved">Принято. Каждый участник получил <b>' + daily.pts + '</b> б.</p>';
+        } else if (state.status === 'rejected') {
       statusArea = '<p class="status-note rejected">Отклонено: ' + escapeHtml(state.reason || 'без указания причины') + '</p>';
       if (inWindow) {
         statusArea += ''
@@ -1042,8 +1068,8 @@
       + '<div class="modal-eyebrow">командный дейлик · ' + dailyWindowLabel(daily) + '</div>'
       + '<h3 class="display modal-title">' + escapeHtml(daily.name) + '</h3></div></div>'
       + '<p class="lore-text muted modal-req">' + escapeHtml(daily.req) + '</p>'
-      + '<div class="modal-points">баллы команде: ' + daily.pts + ' · отчёт один на команду</div>'
-      + statusArea;
+      + '<div class="modal-points">баллы каждому участнику: ' + daily.pts + ' · отчёт один на команду</div>'
+            + statusArea;
 
     attachImageZoom($('#taskModalBody'));
     attachImageUploadHandlers(() => {
@@ -1367,8 +1393,7 @@
     const day = getCurrentDay();
     const members = team.members;
     const personalSum = members.reduce((s, mid) => s + (users[mid] ? personalScore(users[mid]) : 0), 0);
-    const bonus = teamDailyBonus(team);
-    const total = personalSum + bonus;
+    const total = personalSum;
 
     let membersHTML = '';
     members.forEach(mid => {
@@ -1431,7 +1456,7 @@
         +   '</div>'
         +   '<div class="daily-req">' + escapeHtml(d.req) + '</div>'
         +   '<div class="daily-bottom">'
-        +     '<span class="daily-pts">+' + d.pts + ' б. команде</span>'
+        +     '<span class="daily-pts">+' + d.pts + ' б. каждому</span>'
         +     '<span class="daily-status">' + statusLabel + '</span>'
         +   '</div>'
         + '</div>';
@@ -1445,11 +1470,11 @@
       +   '</div>'
       +   '<div class="team-members">' + membersHTML + '</div>'
 
-      +   '<h3 class="dailies-title">Командные дейлики</h3>'
-      +   '<p class="dailies-hint">Три командных задания. Каждое открыто два дня: дни 1–2, 3–4, 5–6. Отчёт один на команду, приложите скриншоты и укажите формат: каждый свой или один за всех.</p>'
+      +   '<h3 class="dailies-title">Командные задания</h3>'
+      +   '<p class="dailies-hint">Три командных задания. Каждое открыто два дня: дни 1–2, 3–4, 5–6. Отчёт один на команду, но при принятии баллы получает каждый участник.</p>'
       +   '<div class="dailies-list">' + dailiesHTML + '</div>'
 
-      +   '<p class="hint-small" style="margin-top:20px;">Общее количество баллов команды — сумма личных баллов всех участников плюс баллы за принятые дейлики.</p>'
+     +   '<p class="hint-small" style="margin-top:20px;">Общее количество баллов команды — сумма личных баллов всех участников, включая баллы за принятые дейлики.</p>'
       + '</div>';
 
     wrap.querySelectorAll('[data-daily]').forEach(card => {
@@ -1571,7 +1596,7 @@
     const buff = SPHERES[path.buffSphere];
     $('#resultIcon').innerHTML = path.icon;
     $('#resultPathName').textContent = path.name;
-    $('#resultBuffText').textContent = 'Туман даёт бафф +' + Math.round((BUFF_MULT - 1) * 100) + '% к баллам за задания сферы «' + buff.name + '»';
+    $('#resultBuffText').textContent = 'Туман даёт бафф +' + Math.round((BUFF_MULT - 1) * 100) + '% к баллам за задания «' + buff.name + '»';
     $('#resultLore').textContent = path.lore;
     showScreen('screen-result');
   }
