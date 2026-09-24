@@ -19,31 +19,17 @@
     { id: 'team-d3', name: 'задание3', req: 'текст', pts: 4, dayFrom: 5, dayTo: 6 }
   ];
 
-  const MASK_ICON_SVG = '<svg viewBox="0 0 48 48" class="mask-icon" xmlns="http://www.w3.org/2000/svg">'
-    + '<path d="M24 4C12.5 4 4.5 12.8 4.5 23c0 9.4 5.8 17.4 13 20.6 1.4-2.1 2.1-3.1 3.3-3.1s1.9 1 3.3 3.1c7.2-3.2 13-11.2 13-20.6C43.5 12.8 35.5 4 24 4Z" fill="none" stroke="currentColor" stroke-width="1.7"/>'
-    + '<path d="M24 5v37.5" stroke="currentColor" stroke-width="0.9" stroke-dasharray="1.4 3.2" opacity="0.55"/>'
-    + '<path d="M9.5 18.5c2.2-2.6 7-2.8 9.3.3M29.2 18.8c2.2-3 7-2.8 9.3-.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
-    + '<path d="M12.6 24.4c1.3-1.7 4.3-1.7 5.6 0 1.3 1.7 1.3 4.6 0 6.3-1.3 1.7-4.3 1.7-5.6 0-1.3-1.7-1.3-4.6 0-6.3Z" fill="none" stroke="currentColor" stroke-width="1.4"/>'
-    + '<path d="M29.8 24.4c1.3-1.7 4.3-1.7 5.6 0 1.3 1.7 1.3 4.6 0 6.3-1.3 1.7-4.3 1.7-5.6 0-1.3-1.7-1.3-4.6 0-6.3Z" fill="none" stroke="currentColor" stroke-width="1.4"/>'
-    + '<circle cx="15.4" cy="27.5" r="0.9" fill="currentColor"/>'
-    + '<circle cx="32.6" cy="27.5" r="0.9" fill="currentColor"/>'
-    + '<path d="M22.2 31c.7 1.1 2.9 1.1 3.6 0" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none"/>'
-    + '<path d="M16.5 36.2c3 2.3 12 2.3 15 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
-    + '<circle cx="10.5" cy="14.5" r="1" fill="currentColor"/>'
-    + '<circle cx="37.5" cy="14.5" r="1" fill="currentColor"/>'
-    + '</svg>';
-
   const PATHS = {
     likotvorcy: {
       name: 'Ликотворцы', icon: '<img src="png/3681529.png" alt="">', buffSphere: 'tvorenie',
       lore: 'Их лики скрыты, а взгляд избегает чужих глаз. Ликотворцы сторонятся заводей и оживлённых троп, предпочитая тишину своего шатра. Денно и нощно они лепят, коптят и разукрашивают маски — и верят, что именно маска убережёт от подкрадывающейся нечисти. Работу сопровождают тихие молитвы. Стоит почувствовать холодок по коже — тушат огонь и сыплют соль у порога.'
     },
     ratniki: {
-      name: 'Ратники', icon: '☠', buffSphere: 'dvizhenie',
+      name: 'Ратники', icon: '<img src="png/297775.png" alt="">', buffSphere: 'dvizhenie',
       lore: 'Утонуть на глубине, провалиться в зыбучую гальку — их этим не напугать. Ратники готовы к любой угрозе, бьют на опережение и смеются смерти в лицо. Следы тварей их не отпугивают, а лишь раззадоривают: скоро можно будет отыскать очаг опасности и разбить его.'
     },
     kudesniki: {
-      name: 'Кудесники', icon: '☥', buffSphere: 'slovo',
+      name: 'Кудесники', icon: '<img src="png/10632653.png" alt="">', buffSphere: 'slovo',
       lore: 'Даже в самые тяжёлые времена дипломатия занимала почётное место — порой рядом с самыми радикальными решениями. Мантры, обряды, подношения — Кудесники кладут на алтарь всё, лишь бы гости из иномирья позволили пережить грядущую ночь.'
     }
   };
@@ -650,15 +636,17 @@
     requestAnimationFrame(() => drawTreeLines(u, svg, wrap, nodeEls));
   }
 
-    function renderCompactTree(u, wrap, byDepth, depths, containerWidth, nodeEls) {
-    const CELL = MOBILE_ITEM;
-    const GX = GAP_X;
-    const GY = GAP_Y;
+      function renderCompactTree(u, wrap, byDepth, depths, containerWidth, nodeEls) {
+    const CELL = 52;
+    const GX = 16;
+    const GY = 18;
+    const ZIGZAG = 28;
+    const BAND_GAP = 44;
 
-    const usableWidth = Math.max(CELL, containerWidth - 24);
+    const usableWidth = Math.max(CELL, containerWidth - 16);
     const perRow = Math.max(1, Math.floor((usableWidth + GX) / (CELL + GX)));
 
-    let cursorY = 40;
+    let cursorY = 30;
 
     depths.forEach((d, depthIndex) => {
       const list = byDepth[d];
@@ -668,43 +656,36 @@
       }
 
       let rowY = cursorY;
-      let globalIdx = 0;
-
       rows.forEach(rowItems => {
         const countInRow = rowItems.length;
         const rowWidth = countInRow * CELL + (countInRow - 1) * GX;
         const startX = Math.max(0, (containerWidth - rowWidth) / 2);
 
         let x = startX;
-        rowItems.forEach((task) => {
+        rowItems.forEach((task, idx) => {
           const unlocked = isTaskUnlockedByDeps(u, task);
-
-          const jx = jitter(task.id + 'mx', 14);
-          const jy = jitter(task.id + 'my', 16);
-
-          const zigX = (globalIdx % 2 === 0 ? -20 : 20) * (0.4 + 0.6 * ((globalIdx + 1) % 3) / 2);
-          const zigY = (globalIdx % 3 === 0 ? -14 : globalIdx % 3 === 1 ? 8 : 18);
-
-          const leftPx = Math.min(containerWidth - CELL / 2, Math.max(CELL / 2, x + CELL / 2 + jx + zigX));
-          const topPx = rowY + jy + zigY;
+          const zig = (idx % 2 === 0 ? -1 : 1) * ZIGZAG;
 
           const outer = document.createElement('div');
           outer.className = 'tree-node-wrap';
-          outer.style.left = leftPx + 'px';
-          outer.style.top = topPx + 'px';
+          outer.style.left = (x + CELL / 2) + 'px';
+          outer.style.top = (rowY + zig) + 'px';
           outer.style.width = CELL + 'px';
           outer.style.transform = 'translateX(-50%)';
 
-          outer.appendChild(unlocked ? renderTaskNodeOrb(u, task) : renderLockedOrb(task));
+          if (unlocked) {
+            outer.appendChild(renderSmallCard(u, task));
+          } else {
+            outer.appendChild(renderLockedOrb(task));
+          }
 
           wrap.appendChild(outer);
           nodeEls[task.id] = outer;
 
           x += CELL + GX;
-          globalIdx++;
         });
 
-        rowY += CELL + GY + 40;
+        rowY += CELL + GY + ZIGZAG * 2;
       });
 
       cursorY = rowY + (depthIndex < depths.length - 1 ? BAND_GAP : 20);
@@ -794,6 +775,29 @@
     return orb;
   }
 
+  function renderSmallCard(u, task) {
+    const state = getTaskState(u, task);
+    const sphere = SPHERES[task.sphere];
+
+    const card = document.createElement('div');
+    card.className = 'task-square state-' + state.status;
+    card.dataset.taskId = task.id;
+    card.addEventListener('click', () => openTaskModal(u, task));
+
+    card.innerHTML = '<span class="tsq-icon">' + sphere.icon + '</span>';
+
+    return card;
+  }
+
+    function renderLockedSquare(task) {
+    const sphere = SPHERES[task.sphere];
+    const card = document.createElement('div');
+    card.className = 'task-square state-locked';
+    card.innerHTML = '<span class="tsq-icon">' + sphere.icon + '</span>';
+    card.addEventListener('click', () => toast('Скрыто туманом — выполни предыдущее задание, чтобы это открылось'));
+    return card;
+  }
+  
   function renderTaskNodeCard(u, task) {
     const state = getTaskState(u, task);
     const sphere = SPHERES[task.sphere];
