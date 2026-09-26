@@ -34,10 +34,30 @@
       <div class="field">
         <label>ID персонажа</label>
         <input type="text" id="inputId" placeholder=" ">
-<p class="field-hint">Вышел? Заходи с тем же именем и ID</p>
-<p class="err-text" id="authErr">Заполни имя и ID, прежде чем вступить во тьму.</p>
+        <p class="field-hint">Вышел? Заходи с тем же именем и ID</p>
+        <p class="admin-code-hint" id="adminCodeHint">С этим ID откроется вкладка «Модерация»</p>
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input type="password" id="inputPin" placeholder=" " autocomplete="new-password">
+        <p class="field-hint">Придумай при первом входе. Потом — тот же самый.</p>
+        <p class="err-text" id="authErr">Проверь имя, ID и пароль.</p>
       </div>
       <button class="btn btn-primary" id="btnStartAuth">Проснуться?</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="screen-pending">
+  <div class="mist-wrap">
+    <div class="auth-card snug">
+      <p class="eyebrow">Туман ждёт решения хранителей</p>
+      <h2 class="display screen-title" id="pendingName">—</h2>
+      <p class="lore-text">Твоя заявка отправлена хранителям тумана. Как только они подтвердят вход — ты сможешь пройти видения.</p>
+      <p class="lore-text muted">Эта страница обновится сама. Если долго нет ответа — нажми «Проверить снова».</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btnPendingRefresh">Проверить снова</button>
+      </div>
     </div>
   </div>
 </section>
@@ -47,8 +67,7 @@
     <div class="auth-card snug">
       <p class="eyebrow">Видение тумана</p>
       <h2 class="display screen-title" id="greetName">Туман знает твоё имя</h2>
-      <p class="lore-text">
-        Пройди через пять видений — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong> или хитрый <strong>Кудесник</strong>.</p>
+      <p class="lore-text">Пройди через пять видений — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong> или хитрый <strong>Кудесник</strong>.</p>
       <div class="btn-row">
         <button class="btn btn-primary" id="btnStartTest">Войти в видения</button>
       </div>
@@ -119,48 +138,31 @@
       <div class="profile-row" id="profileRow">
         <div class="chip chip-gold" id="chipPath">Путь: —</div>
         <div class="chip chip-gold" id="chipBuff">Бафф: —</div>
-        <div class="chip chip-gold" id="chipAdmin" style="display:none;">Хранитель тумана</div>
         <div class="chip" title="День события">День <span id="dayNum" class="mono">1</span></div>
-        <div class="chip chip-btn" id="btnDayMinus" title="День −1">−</div>
-        <div class="chip chip-btn" id="btnDayPlus" title="День +1">+</div>
-        <div class="chip chip-btn" id="btnLogout" title="Выйти и сменить персонажа">Выйти</div>
+        <div class="chip chip-btn" id="btnDayMinus" title="День −1" style="display:none;">−</div>
+        <div class="chip chip-btn" id="btnDayPlus" title="День +1" style="display:none;">+</div>
       </div>
       <div class="overview">
         <div class="river-progress">
-          <div class="label"><span>Выполнено заданий</span><span class="count mono" id="levelPoints">0 / 0</span></div>
+          <div class="label"><span>Принято заданий</span><span class="count mono" id="levelPoints">0 / 0</span></div>
           <div class="river-track"><div class="river-fill" id="levelFill"></div></div>
         </div>
         <div class="stat-block">
           <div class="stat-num mono" id="personalScore">0</div>
-          <div class="stat-label">баллы</div>
+          <div class="stat-label">личных баллов</div>
         </div>
       </div>
     </div>
   </header>
   <div class="view-tabs">
     <button class="view-tab active" data-tab="tasks">Задания</button>
+    <button class="view-tab" data-tab="predictions">Предсказания</button>
     <button class="view-tab" data-tab="team">Команда</button>
     <button class="view-tab" data-tab="rewards">Награды</button>
     <button class="view-tab" data-tab="mod" id="modTabBtn" style="display:none;">Модерация</button>
   </div>
   <main class="dash-main">
     <div class="tabview active" id="tabview-tasks">
-      <div class="moderators-note">
-  <div class="moderators-note-text">
-    <span class="moderators-note-icon">✦</span>
-    <span>Если нужно быстрее — напиши ответственным во ВК.</span>
-  </div>
-  <div class="moderators-list">
-    <a href="https://vk.com/имя_хранителя_1" target="_blank" rel="noopener" class="moderator-link">
-      <span class="moderator-name">Тенька</span>
-      <span class="moderator-id">[1707227]</span>
-    </a>
-    <a href="https://vk.com/имя_хранителя_2" target="_blank" rel="noopener" class="moderator-link">
-      <span class="moderator-name">Имя</span>
-      <span class="moderator-id">[ID]</span>
-    </a>
-  </div>
-</div>
       <div class="tasks-toolbar">
         <div class="state-legend">
           <span class="st-none"><i></i>не начато</span>
@@ -174,6 +176,9 @@
       </div>
       <div class="skill-map" id="taskTree"></div>
     </div>
+    <div class="tabview" id="tabview-predictions">
+      <div id="predictionsWrap"></div>
+    </div>
     <div class="tabview" id="tabview-team">
       <div id="teamPanelWrap"></div>
     </div>
@@ -181,14 +186,23 @@
       <div class="stub-block">Раздел наград появится позже.</div>
     </div>
     <div class="tabview" id="tabview-mod">
-      <p class="lore-text muted" style="margin-bottom:18px;">Здесь собираются все отчёты, отправленные в туман. Прими или отклони их — при отклонении можно оставить причину.</p>
-      <div class="admin-filter-row" id="adminFilterRow">
-        <button class="admin-filter-btn active" data-filter="pending">На проверке</button>
-        <button class="admin-filter-btn" data-filter="approved">Принятые</button>
-        <button class="admin-filter-btn" data-filter="rejected">Отклонённые</button>
-        <button class="admin-filter-btn" data-filter="all">Все</button>
+      <div class="mod-subtabs">
+        <button class="mod-subtab active" data-modtab="reports">Отчёты</button>
+        <button class="mod-subtab" data-modtab="teams">Команды</button>
+        <button class="mod-subtab" data-modtab="responsibles">Участники</button>
       </div>
-      <div id="adminList"></div>
+      <div class="mod-panel active" id="modpanel-reports">
+        <p class="lore-text muted" style="margin-bottom:18px;">Все отчёты, отправленные в туман. Прими или отклони их — при отклонении можно оставить причину.</p>
+        <div class="admin-filter-row" id="adminFilterRow">
+          <button class="admin-filter-btn active" data-filter="pending">На проверке</button>
+          <button class="admin-filter-btn" data-filter="approved">Принятые</button>
+          <button class="admin-filter-btn" data-filter="rejected">Отклонённые</button>
+          <button class="admin-filter-btn" data-filter="all">Все</button>
+        </div>
+        <div id="adminList"></div>
+      </div>
+      <div class="mod-panel" id="modpanel-teams"></div>
+      <div class="mod-panel" id="modpanel-responsibles"></div>
     </div>
   </main>
 </section>
@@ -204,13 +218,14 @@
   <button class="image-viewer-close" id="imageViewerClose">✕</button>
   <img id="imageViewerImg" src="" alt="">
 </div>
+
 <div class="reject-backdrop" id="rejectBackdrop">
   <div class="reject-modal">
     <button class="modal-close" id="rejectCloseBtn">✕</button>
     <div class="modal-head">
       <div class="modal-icon" style="color: var(--err); border-color: var(--err);">✕</div>
       <div>
-        <div class="modal-eyebrow">хранитель тумана</div>
+        <div class="modal-eyebrow">модерация</div>
         <h3 class="display modal-title" style="color: var(--err);">Отклонить отчёт</h3>
       </div>
     </div>
@@ -229,6 +244,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
