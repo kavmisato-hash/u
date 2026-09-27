@@ -25,12 +25,14 @@
         font-family: 'PT Mono', monospace; font-size: 11px;
       }
       .maze-task .variant {
-        flex: 1 1 60px; padding: 8px;
+        flex: 1 1 60px; padding: 9px 4px;
         background: transparent;
         border: 1px solid #223336;
         color: #798c89;
         cursor: pointer; transition: .2s;
         font-family: inherit; letter-spacing: .1em;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
       }
       .maze-task .variant:hover { border-color: rgba(194,168,120,.4); color: #c2a878; }
       .maze-task .variant.active {
@@ -38,13 +40,11 @@
         background: rgba(194,168,120,.08);
       }
       .maze-task .variant.done {
-        border-color: #8ac47a;
-        color: #8ac47a;
+        border-color: #8ac47a; color: #8ac47a;
         background: rgba(138,196,122,.14);
       }
       .maze-task .variant.done.active {
-        border-color: #c2a878;
-        color: #c2a878;
+        border-color: #c2a878; color: #c2a878;
         background: rgba(194,168,120,.12);
       }
       .maze-task .conditions {
@@ -82,6 +82,7 @@
         width: 10px; height: 10px;
         border-radius: 2px;
         display: inline-block;
+        border: 1px solid rgba(255,255,255,0.15);
       }
       .maze-task .mz-row {
         display: flex; align-items: center; justify-content: space-between;
@@ -96,12 +97,13 @@
         aspect-ratio: 1 / 1;
         background: #0d1517;
         border: 1px solid #223336;
-        padding: 6px;
+        padding: 4px;
         display: flex; align-items: center; justify-content: center;
         touch-action: none;
         user-select: none;
         -webkit-user-select: none;
         -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
       }
       .maze-task canvas {
         display: block;
@@ -109,8 +111,25 @@
         cursor: crosshair;
         border: 1px solid #1a2528;
       }
+      .maze-task .maze-actions {
+        display: flex; gap: 8px; margin-top: 10px;
+      }
+      .maze-task .mz-reset {
+        flex: 1;
+        padding: 12px 14px;
+        background: transparent;
+        border: 1px solid #223336;
+        color: #798c89;
+        font-family: 'PT Mono', monospace;
+        font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+        cursor: pointer; transition: .2s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      .maze-task .mz-reset:hover { border-color: rgba(194,168,120,.4); color: #c2a878; }
+      .maze-task .mz-reset:active { background: rgba(194,168,120,.08); }
       .maze-task .mz-status {
-        margin-top: 12px;
+        margin-top: 10px;
         min-height: 44px;
         padding: 10px 12px;
         font-size: 13px;
@@ -122,17 +141,9 @@
       }
       .maze-task .mz-status.good { color: #c2a878; border-color: #c2a878; background: rgba(194,168,120,.06); }
       .maze-task .mz-status.bad  { color: #c07a6c; border-color: #c07a6c; background: rgba(192,122,108,.06); }
+
       @media (max-width: 900px) {
-        .maze-task .stage {
-          aspect-ratio: auto;
-          height: 68vh;
-          max-height: 560px;
-          margin-bottom: 4vh;
-        }
-        .maze-task .stage canvas {
-          max-width: 100%;
-          max-height: 100%;
-        }
+        .maze-task .stage { padding: 3px; }
         .maze-task .variants,
         .maze-task .legend,
         .maze-task .conditions {
@@ -140,7 +151,7 @@
           margin-bottom: 6px;
         }
         .maze-task .variant {
-          padding: 7px 4px;
+          padding: 8px 4px;
           font-size: 10px;
         }
         .maze-task .conditions span {
@@ -149,6 +160,7 @@
         }
         .maze-task .legend { font-size: 9px; gap: 6px; }
         .maze-task .mz-status { font-size: 12px; padding: 8px 10px; }
+        .maze-task .mz-reset { padding: 11px 12px; font-size: 10px; }
       }
     `;
     const style = document.createElement('style');
@@ -157,10 +169,11 @@
   }
 
   // ---------- Константы ----------
-  const CELLS_W = 9;
-  const CELLS_H = 9;
-  const GW = CELLS_W * 2 + 1;
-  const GH = CELLS_H * 2 + 1;
+  // Размер сетки выбирается в open(): меньше для телефона, больше для десктопа.
+  let CELLS_W = 9;
+  let CELLS_H = 9;
+  let GW = CELLS_W * 2 + 1;
+  let GH = CELLS_H * 2 + 1;
 
   const COL = {
     bg:         '#0a1012',
@@ -178,19 +191,18 @@
   };
 
   const ZONE_TYPES = {
-    forest: { base: 'rgba(38,72,32,0.6)',    edge: '#7ac454', accent: '#a6e07a', label: 'лес',    good: true },
-    bridge: { base: 'rgba(90,58,28,0.6)',    edge: '#d4924a', accent: '#f0b878', label: 'мост',   good: true },
-    cave:   { base: 'rgba(50,40,60,0.6)',    edge: '#9a7ac0', accent: '#c0a8e8', label: 'пещеру', good: true },
-    water:  { base: 'rgba(24,54,96,0.65)',   edge: '#5aa0e0', accent: '#8ac0f0', label: 'воды',   bad: true },
-    swamp:  { base: 'rgba(72,72,28,0.6)',    edge: '#b8b850', accent: '#d4d478', label: 'болота', bad: true },
-    rocks:  { base: 'rgba(48,48,60,0.6)',    edge: '#8888a8', accent: '#a8a8c8', label: 'скал',   bad: true },
-    thorns: { base: 'rgba(58,20,26,0.6)',    edge: '#e0454a', accent: '#ff7a80', label: 'шипов',  bad: true },
-    lava:   { base: 'rgba(120,30,20,0.65)',  edge: '#e05a30', accent: '#ff9a5a', label: 'лавы',   bad: true }
+    forest: { fill: 'rgba(58,110,48,0.55)',  edge: '#7ac454', label: 'лес',    good: true },
+    bridge: { fill: 'rgba(140,90,42,0.55)',  edge: '#d4924a', label: 'мост',   good: true },
+    cave:   { fill: 'rgba(76,62,96,0.55)',   edge: '#9a7ac0', label: 'пещеру', good: true },
+    water:  { fill: 'rgba(36,76,140,0.55)',  edge: '#5aa0e0', label: 'воды',   bad: true },
+    swamp:  { fill: 'rgba(112,112,42,0.55)', edge: '#b8b850', label: 'болота', bad: true },
+    rocks:  { fill: 'rgba(72,72,90,0.55)',   edge: '#8888a8', label: 'скал',   bad: true },
+    thorns: { fill: 'rgba(86,32,38,0.55)',   edge: '#e0454a', label: 'шипов',  bad: true },
+    lava:   { fill: 'rgba(170,50,32,0.55)',  edge: '#e05a30', label: 'лавы',   bad: true }
   };
 
-  // 9 позиций, куда можно класть зоны. Все одного размера,
-  // симметрично раскиданы по полю 19x19.
-  const POS = {
+  // 9 позиций для десктопа (сетка 19×19).
+  const POS_DESKTOP = {
     tl: { x: 2,  y: 2,  w: 4, h: 4 },
     tc: { x: 7,  y: 2,  w: 5, h: 4 },
     tr: { x: 13, y: 2,  w: 4, h: 4 },
@@ -201,16 +213,30 @@
     bc: { x: 7,  y: 13, w: 5, h: 4 },
     br: { x: 13, y: 13, w: 4, h: 4 }
   };
-  const POS_KEYS = ['tl','tc','tr','ml','cc','mr','bl','bc','br'];
+  const POS_KEYS_DESKTOP = ['tl','tc','tr','ml','cc','mr','bl','bc','br'];
+
+  // 9 позиций для телефона (сетка 15×15).
+  const POS_MOBILE = {
+    tl: { x: 2,  y: 2,  w: 3, h: 3 },
+    tc: { x: 6,  y: 2,  w: 3, h: 3 },
+    tr: { x: 10, y: 2,  w: 3, h: 3 },
+    ml: { x: 2,  y: 6,  w: 3, h: 3 },
+    cc: { x: 6,  y: 6,  w: 3, h: 3 },
+    mr: { x: 10, y: 6,  w: 3, h: 3 },
+    bl: { x: 2,  y: 10, w: 3, h: 3 },
+    bc: { x: 6,  y: 10, w: 3, h: 3 },
+    br: { x: 10, y: 10, w: 3, h: 3 }
+  };
+  const POS_KEYS_MOBILE = ['tl','tc','tr','ml','cc','mr','bl','bc','br'];
 
   // Шаблоны вариантов: набор good/bad типов зон.
   // Раскладка по позициям рандомится для каждого игрока.
   const VARIANT_TEMPLATES = [
-    { good: ['forest', 'bridge'],                 bad: ['water', 'thorns', 'rocks'] },
-    { good: ['cave', 'bridge'],                   bad: ['water', 'swamp', 'lava'] },
-    { good: ['cave', 'bridge'],                   bad: ['water', 'rocks', 'thorns'] },
-    { good: ['forest', 'cave'],                   bad: ['water', 'swamp', 'lava'] },
-    { good: ['forest', 'cave', 'bridge'],         bad: ['water', 'swamp', 'thorns'] }
+    { good: ['forest', 'bridge'],         bad: ['water', 'thorns', 'rocks'] },
+    { good: ['cave', 'bridge'],           bad: ['water', 'swamp', 'lava'] },
+    { good: ['cave', 'bridge'],           bad: ['water', 'rocks', 'thorns'] },
+    { good: ['forest', 'cave'],           bad: ['water', 'swamp', 'lava'] },
+    { good: ['forest', 'cave', 'bridge'], bad: ['water', 'swamp', 'thorns'] }
   ];
 
   // ---------- Утилиты ----------
@@ -240,15 +266,11 @@
     return a;
   }
 
-  // Собираем раскладку зон под конкретного игрока.
-  // seed — числовой seed игрока, variant — 0..4.
-  function buildLayout(variantSeed, variant) {
+  function buildLayout(variantSeed, variant, posMap, posKeys) {
     const tpl = VARIANT_TEMPLATES[variant];
     const rng = makeRng(variantSeed * 2654435761 + variant * 1009 + 13);
 
-    // Перемешиваем позиции, чтобы у каждого игрока зоны
-    // оказались в разных местах.
-    const positions = shuffle(POS_KEYS.slice(), rng);
+    const positions = shuffle(posKeys.slice(), rng);
     const goodTypes = shuffle(tpl.good.slice(), rng);
     const badTypes  = shuffle(tpl.bad.slice(), rng);
 
@@ -257,11 +279,11 @@
 
     goodTypes.forEach(t => {
       const key = positions[idx++];
-      zones.push({ ...POS[key], type: t });
+      zones.push({ ...posMap[key], type: t });
     });
     badTypes.forEach(t => {
       const key = positions[idx++];
-      zones.push({ ...POS[key], type: t });
+      zones.push({ ...posMap[key], type: t });
     });
 
     const conditions = [];
@@ -282,13 +304,22 @@
   function open(container, seedBase, onSuccess) {
     injectStyles();
 
-    // seedBase может быть числом (user id) или строкой (username).
-    // Приводим к стабильному числу.
+    // --- Определяем режим: телефон или десктоп ---
+    const isTouchDevice = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+      || (window.innerWidth < 900);
+
+    CELLS_W = isTouchDevice ? 7 : 9;
+    CELLS_H = isTouchDevice ? 7 : 9;
+    GW = CELLS_W * 2 + 1;
+    GH = CELLS_H * 2 + 1;
+
+    const POS_MAP  = isTouchDevice ? POS_MOBILE     : POS_DESKTOP;
+    const POS_KEYS = isTouchDevice ? POS_KEYS_MOBILE : POS_KEYS_DESKTOP;
+
     const userSeed = (typeof seedBase === 'number')
       ? (seedBase >>> 0)
       : hashStr(String(seedBase));
 
-    // Ключ для сохранения прогресса — привязан к игроку.
     const STORAGE_KEY = 'maze_done::' + userSeed;
 
     container.innerHTML = `
@@ -303,21 +334,25 @@
         <div class="stage" id="mzStage">
           <canvas id="mzCanvas"></canvas>
         </div>
-        <div class="mz-status" id="mzStatus">Коснись золотой точки.</div>
+        <div class="maze-actions">
+          <button type="button" class="mz-reset" id="mzReset">Сбросить путь</button>
+        </div>
+        <div class="mz-status" id="mzStatus">Тапни по золотой точке.</div>
       </div>
     `;
 
-    const variantsWrap    = container.querySelector('#mzVariants');
-    const legendEl        = container.querySelector('#mzLegend');
-    const condEl          = container.querySelector('#mzConditions');
-    const progEl          = container.querySelector('#mzProgress');
-    const variantsDoneEl  = container.querySelector('#mzVariantsDone');
-    const stageEl         = container.querySelector('#mzStage');
-    const canvas          = container.querySelector('#mzCanvas');
-    const ctx             = canvas.getContext('2d');
-    const statusEl        = container.querySelector('#mzStatus');
+    const variantsWrap   = container.querySelector('#mzVariants');
+    const legendEl       = container.querySelector('#mzLegend');
+    const condEl         = container.querySelector('#mzConditions');
+    const progEl         = container.querySelector('#mzProgress');
+    const variantsDoneEl = container.querySelector('#mzVariantsDone');
+    const stageEl        = container.querySelector('#mzStage');
+    const canvas         = container.querySelector('#mzCanvas');
+    const ctx            = canvas.getContext('2d');
+    const statusEl       = container.querySelector('#mzStatus');
+    const resetBtn       = container.querySelector('#mzReset');
 
-    // Прогресс (какие варианты уже пройдены)
+    // Прогресс
     let completedSet = new Set();
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -342,7 +377,6 @@
       }
     }
 
-    // Кнопки вариантов
     const variantBtns = VARIANT_TEMPLATES.map((_, i) => {
       const b = document.createElement('button');
       b.className = 'variant';
@@ -444,8 +478,6 @@
       return null;
     }
 
-    // Проверка: реально ли можно собрать все required зоны,
-    // не заходя ни в одну bad-зону.
     function isSolvable() {
       // 1) В каждой required-зоне должна быть хотя бы одна открытая клетка.
       for (const reqType of V.required) {
@@ -463,8 +495,7 @@
         if (!hasOpen) return false;
       }
 
-      // 2) DFS: путь из старта в финиш, покрывающий все required
-      //    и не заходящий в bad.
+      // 2) DFS: есть ли путь, собирающий все required и не заходящий в bad.
       const reqIndex = {};
       V.required.forEach((t, i) => { reqIndex[t] = i; });
       const fullMask = (1 << V.required.length) - 1;
@@ -497,8 +528,6 @@
       return dfs(startCell[0], startCell[1], 0);
     }
 
-    // Кратчайший путь с требованием "не заходить в bad".
-    // Если avoidBad=true и пути нет — Infinity.
     function maskDistance(avoidBad) {
       const reqIndex = {};
       V.required.forEach((t, i) => { reqIndex[t] = i; });
@@ -528,7 +557,6 @@
       return Infinity;
     }
 
-    // Обход должен быть ощутимо длиннее прямого пути.
     function directPathBlocked() {
       const dFree = maskDistance(false);
       const dAvoid = maskDistance(true);
@@ -539,20 +567,14 @@
       currentVariant = variant;
       variantBtns.forEach((b, i) => b.classList.toggle('active', i === variant));
 
-      // Свой seed для игрока и варианта: лабиринт + раскладка зон
-      // не повторяются ни у одного игрока.
       const variantSeed = ((userSeed ^ (variant * 0x9E3779B1)) >>> 0) || 1;
 
-      // Раскладываем зоны под игрока.
-      V = buildLayout(variantSeed, variant);
+      V = buildLayout(variantSeed, variant, POS_MAP, POS_KEYS);
 
       startCell = [1, 1];
       endCell = [GW - 2, GH - 2];
 
-      // Ищем лабиринт, который:
-      //   (а) проходим (есть путь через все required зоны),
-      //   (б) требует обхода (прямой путь короче на 5+ шагов),
-      //   (в) в каждой required-зоне есть открытые клетки.
+      // Ищем лабиринт: проходим, требует обхода, в каждой good-зоне есть открытая клетка.
       let seed = variantSeed + 1;
       let tries = 0;
       let found = false;
@@ -563,7 +585,7 @@
         if (isSolvable() && directPathBlocked()) { found = true; break; }
       } while (tries < 800);
 
-      // Фолбэк — берём первый просто проходимый.
+      // Фолбэк — первый просто проходимый.
       if (!found) {
         seed = variantSeed + 1;
         tries = 0;
@@ -589,7 +611,7 @@
       draw();
       updateHud();
       statusEl.className = 'mz-status';
-      statusEl.textContent = 'Коснись золотой точки и веди палец.';
+      statusEl.textContent = 'Тапни по золотой точке.';
     }
 
     function renderConditions() {
@@ -604,14 +626,14 @@
       const types = [...new Set(V.zones.map(z => z.type))];
       legendEl.innerHTML = types.map(t => {
         const meta = ZONE_TYPES[t];
-        return '<span class="item"><span class="swatch" style="background:' + meta.edge + '"></span>' + meta.label + '</span>';
+        return '<span class="item"><span class="swatch" style="background:' + meta.fill + ';border-color:' + meta.edge + '"></span>' + meta.label + '</span>';
       }).join('');
     }
 
     function resize() {
       const rect = stageEl.getBoundingClientRect();
       const size = Math.floor(Math.min(rect.width, rect.height) - 12);
-      CELL = Math.max(20, Math.floor(size / GW));
+      CELL = Math.max(14, Math.floor(size / GW));
       const csize = CELL * GW;
       const dpr = window.devicePixelRatio || 1;
       canvas.width = csize * dpr;
@@ -630,12 +652,15 @@
       ctx.fillStyle = COL.bg;
       ctx.fillRect(0, 0, W, H);
 
+      // Коридоры
       for (let y = 0; y < GH; y++) {
         for (let x = 0; x < GW; x++) {
           if (grid[y][x] === 0) drawCorridorTile(x, y);
         }
       }
+      // Зоны поверх коридоров
       V.zones.forEach(z => drawZone(z));
+      // Стены поверх всего
       for (let y = 0; y < GH; y++) {
         for (let x = 0; x < GW; x++) {
           if (grid[y][x] === 1) drawWallTile(x, y);
@@ -674,28 +699,31 @@
       ctx.moveTo(px + 1, py + 1);
       ctx.lineTo(px + CELL - 1, py + 1);
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(50,68,72,0.4)';
-      ctx.beginPath();
-      ctx.moveTo(px + CELL * 0.3, py + CELL * 0.3);
-      ctx.lineTo(px + CELL * 0.7, py + CELL * 0.7);
-      ctx.stroke();
     }
 
+    // Зона: сплошная заливка + рамка + уголки. Без узоров.
     function drawZone(z) {
       const meta = ZONE_TYPES[z.type];
       const isDone = collected.has(z.type);
+
+      // Заливаем только проходимые клетки внутри зоны.
       for (let y = z.y; y < z.y + z.h; y++) {
         for (let x = z.x; x < z.x + z.w; x++) {
           if (x < 0 || x >= GW || y < 0 || y >= GH) continue;
           if (grid[y][x] !== 0) continue;
-          drawZoneTile(x, y, z.type);
+          ctx.fillStyle = meta.fill;
+          ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
         }
       }
+
+      // Рамка по периметру зоны.
       ctx.strokeStyle = meta.edge;
       ctx.lineWidth = isDone ? 3 : 2;
-      ctx.globalAlpha = isDone ? 1 : 0.85;
+      ctx.globalAlpha = isDone ? 1 : 0.9;
       ctx.strokeRect(z.x * CELL + 1, z.y * CELL + 1, z.w * CELL - 2, z.h * CELL - 2);
       ctx.globalAlpha = 1;
+
+      // Уголки-засечки.
       const marks = [
         [z.x * CELL + 1, z.y * CELL + 1],
         [(z.x + z.w) * CELL - 1, z.y * CELL + 1],
@@ -710,172 +738,22 @@
         ctx.moveTo(mx, my); ctx.lineTo(mx, my + 5);
         ctx.stroke();
       });
+
+      // Галочка если зона собрана.
       if (isDone) {
         ctx.fillStyle = meta.edge;
-        ctx.font = Math.max(11, Math.floor(CELL * 0.75)) + 'px sans-serif';
+        ctx.font = 'bold ' + Math.max(12, Math.floor(CELL * 0.9)) + 'px sans-serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
-        ctx.fillText('✓', (z.x + z.w) * CELL - 8, z.y * CELL + 6);
+        ctx.fillText('✓', (z.x + z.w) * CELL - 6, z.y * CELL + 4);
       }
-    }
-
-    function drawZoneTile(x, y, type) {
-      const px = x * CELL, py = y * CELL;
-      const meta = ZONE_TYPES[type];
-      ctx.fillStyle = meta.base;
-      ctx.fillRect(px, py, CELL, CELL);
-      if (type === 'forest') drawForestPattern(px, py, meta);
-      else if (type === 'bridge') drawBridgePattern(px, py, meta);
-      else if (type === 'water') drawWaterPattern(px, py, meta);
-      else if (type === 'swamp') drawSwampPattern(px, py, meta);
-      else if (type === 'rocks') drawRocksPattern(px, py, meta);
-      else if (type === 'thorns') drawThornsPattern(px, py, meta);
-      else if (type === 'lava') drawLavaPattern(px, py, meta);
-      else if (type === 'cave') drawCavePattern(px, py, meta);
-      ctx.strokeStyle = meta.edge;
-      ctx.globalAlpha = 0.35;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(px + 0.5, py + 0.5, CELL - 1, CELL - 1);
-      ctx.globalAlpha = 1;
-    }
-
-    function hash(x, y) {
-      let h = (x * 73856093) ^ (y * 19349663);
-      return ((h >>> 0) % 1000) / 1000;
-    }
-
-    function drawForestPattern(px, py, meta) {
-      const cols = CELL >= 14 ? 2 : 1;
-      const size = CELL / cols;
-      for (let i = 0; i < cols; i++) for (let j = 0; j < cols; j++) {
-        const cx = px + size * i + size / 2;
-        const cy = py + size * j + size / 2;
-        const s = size * 0.32;
-        ctx.fillStyle = meta.accent;
-        ctx.globalAlpha = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - s); ctx.lineTo(cx - s * 0.8, cy); ctx.lineTo(cx + s * 0.8, cy);
-        ctx.closePath(); ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - s * 0.3); ctx.lineTo(cx - s * 0.6, cy + s * 0.6); ctx.lineTo(cx + s * 0.6, cy + s * 0.6);
-        ctx.closePath(); ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-    }
-
-    function drawBridgePattern(px, py, meta) {
-      ctx.strokeStyle = meta.accent;
-      ctx.globalAlpha = 0.5;
-      ctx.lineWidth = 1;
-      for (let yy = 2; yy < CELL; yy += 3) {
-        ctx.beginPath();
-        ctx.moveTo(px + 1, py + yy + 0.5);
-        ctx.lineTo(px + CELL - 1, py + yy + 0.5);
-        ctx.stroke();
-      }
-      ctx.beginPath();
-      for (let xx = 3; xx < CELL; xx += 5) {
-        ctx.moveTo(px + xx + 0.5, py + 1);
-        ctx.lineTo(px + xx + 0.5, py + CELL - 1);
-      }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-
-    function drawWaterPattern(px, py, meta) {
-      ctx.strokeStyle = meta.accent;
-      ctx.globalAlpha = 0.55;
-      ctx.lineWidth = 1;
-      const step = Math.max(3, CELL / 3);
-      for (let yy = step; yy < CELL; yy += step) {
-        ctx.beginPath();
-        for (let xx = 0; xx <= CELL; xx += 3) {
-          const waveY = py + yy + Math.sin(xx * 0.7 + yy) * 1.2;
-          if (xx === 0) ctx.moveTo(px + xx, waveY);
-          else ctx.lineTo(px + xx, waveY);
-        }
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawSwampPattern(px, py, meta) {
-      ctx.fillStyle = meta.accent;
-      ctx.globalAlpha = 0.4;
-      const count = CELL >= 14 ? 3 : 2;
-      for (let i = 0; i < count; i++) {
-        const r = hash(px + i, py + i * 2);
-        const cx = px + r * (CELL - 4) + 2;
-        const cy = py + ((r * 3) % 1) * (CELL - 4) + 2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, Math.max(1, CELL * 0.08), 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawRocksPattern(px, py, meta) {
-      ctx.fillStyle = meta.accent;
-      ctx.globalAlpha = 0.45;
-      const count = CELL >= 14 ? 2 : 1;
-      for (let i = 0; i < count; i++) {
-        const cx = px + CELL * (0.3 + i * 0.4);
-        const cy = py + CELL * 0.7;
-        const s = CELL * 0.25;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - s); ctx.lineTo(cx - s, cy); ctx.lineTo(cx + s, cy);
-        ctx.closePath(); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawThornsPattern(px, py, meta) {
-      ctx.strokeStyle = meta.accent;
-      ctx.globalAlpha = 0.65;
-      ctx.lineWidth = 1.5;
-      const count = CELL >= 14 ? 3 : 2;
-      for (let i = 0; i < count; i++) {
-        const r = hash(px + i * 4, py + i * 6);
-        const cx = px + r * (CELL - 6) + 3;
-        const cy = py + ((r * 5) % 1) * (CELL - 6) + 3;
-        const s = CELL * 0.14;
-        ctx.beginPath();
-        ctx.moveTo(cx - s, cy - s); ctx.lineTo(cx + s, cy + s);
-        ctx.moveTo(cx - s, cy + s); ctx.lineTo(cx + s, cy - s);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawLavaPattern(px, py, meta) {
-      ctx.fillStyle = meta.accent;
-      ctx.globalAlpha = 0.5;
-      const cx = px + CELL / 2, cy = py + CELL / 2;
-      for (let i = 0; i < 4; i++) {
-        const ang = i * Math.PI / 2 + Math.PI / 4;
-        ctx.beginPath();
-        ctx.arc(cx + Math.cos(ang) * CELL * 0.18, cy + Math.sin(ang) * CELL * 0.18, CELL * 0.11, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawCavePattern(px, py, meta) {
-      ctx.strokeStyle = meta.accent;
-      ctx.globalAlpha = 0.5;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(px + 2, py + CELL - 2);
-      ctx.quadraticCurveTo(px + CELL / 2, py + 2, px + CELL - 2, py + CELL - 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
     }
 
     function drawTrail() {
       if (trail.length <= 1) return;
       const pts = trail.map(([x, y]) => [x * CELL + CELL / 2, y * CELL + CELL / 2]);
       ctx.strokeStyle = COL.trailGlow;
-      ctx.lineWidth = Math.max(6, CELL * 0.75);
+      ctx.lineWidth = Math.max(8, CELL * 0.85);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -939,44 +817,76 @@
     function cellFromPoint(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const scale = (CELL * GW) / rect.width;
-      const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-      const offY = isTouch ? 60 : 0;
       const fx = (clientX - rect.left) * scale / CELL;
-      const fy = (clientY - rect.top - offY) * scale / CELL;
+      const fy = (clientY - rect.top) * scale / CELL;
       let x = Math.floor(fx), y = Math.floor(fy);
 
+      // Если попал в стену или за пределы — ищем ближайшую проходимую клетку.
       if (y < 0 || y >= GH || x < 0 || x >= GW || grid[y][x] === 1) {
         let best = null, bestDist = Infinity;
-        for (const [cx, cy] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]) {
-          if (cx < 0 || cx >= GW || cy < 0 || cy >= GH) continue;
-          if (grid[cy][cx] !== 0) continue;
-          const d = Math.hypot((cx + 0.5) - fx, (cy + 0.5) - fy);
-          if (d < bestDist) { bestDist = d; best = [cx, cy]; }
+        for (let cy = Math.max(0, y - 1); cy <= Math.min(GH - 1, y + 1); cy++) {
+          for (let cx = Math.max(0, x - 1); cx <= Math.min(GW - 1, x + 1); cx++) {
+            if (grid[cy][cx] !== 0) continue;
+            const d = Math.hypot((cx + 0.5) - fx, (cy + 0.5) - fy);
+            if (d < bestDist) { bestDist = d; best = [cx, cy]; }
+          }
         }
-        if (best && bestDist < 1) { x = best[0]; y = best[1]; }
+        if (best && bestDist < 1.5) { x = best[0]; y = best[1]; }
       }
       return [x, y];
+    }
+
+    // Пересобирает collected после отката трейла.
+    function recollectFromTrail() {
+      collected = new Set();
+      V.zones.forEach(z => {
+        if (!ZONE_TYPES[z.type].good) return;
+        for (const [tx, ty] of trail) {
+          if (tx >= z.x && tx < z.x + z.w && ty >= z.y && ty < z.y + z.h) {
+            collected.add(z.type);
+            break;
+          }
+        }
+      });
+      renderConditions();
     }
 
     function tryExtend(x, y) {
       if (won || gameOver) return;
       if (x < 0 || x >= GW || y < 0 || y >= GH) return;
       if (grid[y][x] !== 0) return;
+
+      // Возврат по своей же линии: обрезаем всё, что было после.
+      const existingIdx = trail.findIndex(p => p[0] === x && p[1] === y);
+      if (existingIdx >= 0 && existingIdx < trail.length - 1) {
+        trail = trail.slice(0, existingIdx + 1);
+        visited = new Set(trail.map(p => key(p[0], p[1])));
+        recollectFromTrail();
+        draw();
+        updateHud();
+        return;
+      }
+
       const last = trail[trail.length - 1];
       if (last[0] === x && last[1] === y) return;
       const dx = Math.abs(last[0] - x);
       const dy = Math.abs(last[1] - y);
       if (dx + dy !== 1) return;
       if (visited.has(key(x, y))) return;
+
       const zone = zoneAt(x, y);
       if (zone) {
         const meta = ZONE_TYPES[zone.type];
-        if (meta.bad) { breakTrail(meta.label.charAt(0).toUpperCase() + meta.label.slice(1) + ' — нельзя сюда заходить.'); return; }
+        if (meta.bad) {
+          breakTrail(meta.label.charAt(0).toUpperCase() + meta.label.slice(1) + ' — нельзя сюда заходить.');
+          return;
+        }
         if (meta.good && !collected.has(zone.type)) {
           collected.add(zone.type);
           renderConditions();
         }
       }
+
       trail.push([x, y]);
       visited.add(key(x, y));
       if (x === endCell[0] && y === endCell[1]) win();
@@ -988,7 +898,7 @@
       pointerDown = false;
       gameOver = true;
       statusEl.className = 'mz-status bad';
-      statusEl.textContent = '✗ ' + msg + ' Начни сначала.';
+      statusEl.textContent = '✗ ' + msg + ' Нажми «Сбросить путь».';
       trail = [[startCell[0], startCell[1]]];
       visited = new Set([key(startCell[0], startCell[1])]);
       collected = new Set();
@@ -1034,26 +944,63 @@
 
     function onDown(e) {
       if (won) return;
-      let [x, y] = cellFromPoint(e.clientX, e.clientY);
+      const [x, y] = cellFromPoint(e.clientX, e.clientY);
+
+      // 1. Тап по золотой точке — начать заново.
       const nearStart =
         Math.abs(x - startCell[0]) <= 1 &&
         Math.abs(y - startCell[1]) <= 1;
       if (nearStart) {
         gameOver = false;
         pointerDown = true;
-        trail = [[x, y]];
-        visited = new Set([key(x, y)]);
+        trail = [[startCell[0], startCell[1]]];
+        visited = new Set([key(startCell[0], startCell[1])]);
         collected = new Set();
         renderConditions();
+        lastPoint = [startCell[0], startCell[1]];
+        e.preventDefault();
+        statusEl.className = 'mz-status';
+        statusEl.textContent = 'Веди палец...';
+        draw();
+        updateHud();
+        return;
+      }
+
+      // 2. Тап рядом с кончиком — продолжаем.
+      const last = trail[trail.length - 1];
+      if (Math.abs(x - last[0]) <= 2 && Math.abs(y - last[1]) <= 2) {
+        gameOver = false;
+        pointerDown = true;
+        lastPoint = last;
+        e.preventDefault();
+        statusEl.className = 'mz-status';
+        statusEl.textContent = 'Веди палец...';
+        draw();
+        updateHud();
+        return;
+      }
+
+      // 3. Тап по линии — откат до этой клетки.
+      const idx = trail.findIndex(p => p[0] === x && p[1] === y);
+      if (idx >= 0) {
+        trail = trail.slice(0, idx + 1);
+        visited = new Set(trail.map(p => key(p[0], p[1])));
+        recollectFromTrail();
+        gameOver = false;
+        pointerDown = true;
         lastPoint = [x, y];
         e.preventDefault();
         statusEl.className = 'mz-status';
-        statusEl.textContent = 'Не отпускай...';
+        statusEl.textContent = 'Откат. Веди дальше...';
         draw();
         updateHud();
-      } else if (!gameOver) {
+        return;
+      }
+
+      // 4. Мимо.
+      if (!gameOver) {
         statusEl.className = 'mz-status';
-        statusEl.textContent = 'Начни с золотой точки.';
+        statusEl.textContent = 'Тапни по линии или начни заново с золотой точки.';
       }
     }
 
@@ -1075,20 +1022,15 @@
       lastPoint = [x, y];
     }
 
+    // Отпускание пальца НЕ убивает линию: можно продолжить с кончика
+    // или откатиться, тапнув по линии.
     function onUp() {
       if (!pointerDown) return;
       pointerDown = false;
       lastPoint = null;
-      if (!won && !gameOver && trail.length > 1) {
-        gameOver = true;
-        statusEl.className = 'mz-status bad';
-        statusEl.textContent = '✗ След оборвался. Начни сначала.';
-        trail = [[startCell[0], startCell[1]]];
-        visited = new Set([key(startCell[0], startCell[1])]);
-        collected = new Set();
-        renderConditions();
-        draw();
-        updateHud();
+      if (!won && !gameOver) {
+        statusEl.className = 'mz-status';
+        statusEl.textContent = 'Можно вести дальше с кончика или тапнуть по линии для отката.';
       }
     }
 
@@ -1100,6 +1042,10 @@
     variantBtns.forEach((b, i) => {
       b.addEventListener('click', () => setup(i));
     });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => setup(currentVariant));
+    }
 
     const resizeHandler = () => { resize(); draw(); };
     window.addEventListener('resize', resizeHandler);
