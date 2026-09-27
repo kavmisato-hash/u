@@ -37,6 +37,16 @@
         border-color: #c2a878; color: #c2a878;
         background: rgba(194,168,120,.08);
       }
+      .maze-task .variant.done {
+        border-color: #8ac47a;
+        color: #8ac47a;
+        background: rgba(138,196,122,.14);
+      }
+      .maze-task .variant.done.active {
+        border-color: #c2a878;
+        color: #c2a878;
+        background: rgba(194,168,120,.12);
+      }
       .maze-task .conditions {
         display: flex; flex-wrap: wrap; gap: 8px;
         margin-bottom: 10px;
@@ -112,13 +122,41 @@
       }
       .maze-task .mz-status.good { color: #c2a878; border-color: #c2a878; background: rgba(194,168,120,.06); }
       .maze-task .mz-status.bad  { color: #c07a6c; border-color: #c07a6c; background: rgba(192,122,108,.06); }
+      @media (max-width: 900px) {
+        .maze-task .stage {
+          aspect-ratio: auto;
+          height: 68vh;
+          max-height: 560px;
+          margin-bottom: 4vh;
+        }
+        .maze-task .stage canvas {
+          max-width: 100%;
+          max-height: 100%;
+        }
+        .maze-task .variants,
+        .maze-task .legend,
+        .maze-task .conditions {
+          gap: 4px;
+          margin-bottom: 6px;
+        }
+        .maze-task .variant {
+          padding: 7px 4px;
+          font-size: 10px;
+        }
+        .maze-task .conditions span {
+          padding: 3px 7px;
+          font-size: 9px;
+        }
+        .maze-task .legend { font-size: 9px; gap: 6px; }
+        .maze-task .mz-status { font-size: 12px; padding: 8px 10px; }
+      }
     `;
     const style = document.createElement('style');
     style.textContent = css;
     document.head.appendChild(style);
   }
 
-  // ---- Константы лабиринта ----
+  // ---------- Константы ----------
   const CELLS_W = 9;
   const CELLS_H = 9;
   const GW = CELLS_W * 2 + 1;
@@ -142,14 +180,16 @@
   const ZONE_TYPES = {
     forest: { base: 'rgba(38,72,32,0.6)',    edge: '#7ac454', accent: '#a6e07a', label: 'лес',    good: true },
     bridge: { base: 'rgba(90,58,28,0.6)',    edge: '#d4924a', accent: '#f0b878', label: 'мост',   good: true },
-    water:  { base: 'rgba(24,54,96,0.65)',   edge: '#5aa0e0', accent: '#8ac0f0', label: 'вода',   bad: true },
-    swamp:  { base: 'rgba(72,72,28,0.6)',    edge: '#b8b850', accent: '#d4d478', label: 'болото', bad: true },
-    rocks:  { base: 'rgba(48,48,60,0.6)',    edge: '#8888a8', accent: '#a8a8c8', label: 'скалы',  bad: true },
-    thorns: { base: 'rgba(58,20,26,0.6)',    edge: '#e0454a', accent: '#ff7a80', label: 'шипы',   bad: true },
-    lava:   { base: 'rgba(120,30,20,0.65)',  edge: '#e05a30', accent: '#ff9a5a', label: 'лава',   bad: true },
-    cave:   { base: 'rgba(50,40,60,0.6)',    edge: '#9a7ac0', accent: '#c0a8e8', label: 'пещера', good: true }
+    cave:   { base: 'rgba(50,40,60,0.6)',    edge: '#9a7ac0', accent: '#c0a8e8', label: 'пещеру', good: true },
+    water:  { base: 'rgba(24,54,96,0.65)',   edge: '#5aa0e0', accent: '#8ac0f0', label: 'воды',   bad: true },
+    swamp:  { base: 'rgba(72,72,28,0.6)',    edge: '#b8b850', accent: '#d4d478', label: 'болота', bad: true },
+    rocks:  { base: 'rgba(48,48,60,0.6)',    edge: '#8888a8', accent: '#a8a8c8', label: 'скал',   bad: true },
+    thorns: { base: 'rgba(58,20,26,0.6)',    edge: '#e0454a', accent: '#ff7a80', label: 'шипов',  bad: true },
+    lava:   { base: 'rgba(120,30,20,0.65)',  edge: '#e05a30', accent: '#ff9a5a', label: 'лавы',   bad: true }
   };
 
+  // 9 позиций, куда можно класть зоны. Все одного размера,
+  // симметрично раскиданы по полю 19x19.
   const POS = {
     tl: { x: 2,  y: 2,  w: 4, h: 4 },
     tc: { x: 7,  y: 2,  w: 5, h: 4 },
@@ -161,109 +201,103 @@
     bc: { x: 7,  y: 13, w: 5, h: 4 },
     br: { x: 13, y: 13, w: 4, h: 4 }
   };
+  const POS_KEYS = ['tl','tc','tr','ml','cc','mr','bl','bc','br'];
 
-  const VARIANTS = [
-    {
-      conditions: [
-        { text: '✓ через лес',  good: true,  key: 'forest' },
-        { text: '✗ без воды',   good: false },
-        { text: '✓ через мост', good: true,  key: 'bridge' }
-      ],
-      required: ['forest', 'bridge'],
-      zones: [
-        { ...POS.tc, type: 'forest' },
-        { ...POS.bc, type: 'bridge' },
-        { ...POS.cc, type: 'water' },
-        { ...POS.mr, type: 'water' }
-      ]
-    },
-    {
-      conditions: [
-        { text: '✓ через лес',  good: true,  key: 'forest' },
-        { text: '✗ без болота', good: false },
-        { text: '✗ без скал',   good: false },
-        { text: '✗ без лавы',   good: false },
-        { text: '✓ через мост', good: true,  key: 'bridge' }
-      ],
-      required: ['forest', 'bridge'],
-      zones: [
-        { ...POS.ml, type: 'forest' },
-        { ...POS.mr, type: 'bridge' },
-        { ...POS.cc, type: 'rocks' },
-        { ...POS.tc, type: 'swamp' },
-        { ...POS.tl, type: 'lava' }
-      ]
-    },
-    {
-      conditions: [
-        { text: '✓ через пещеру', good: true,  key: 'cave' },
-        { text: '✗ без воды',     good: false },
-        { text: '✗ без скал',     good: false },
-        { text: '✗ без шипов',    good: false },
-        { text: '✓ через мост',   good: true,  key: 'bridge' }
-      ],
-      required: ['cave', 'bridge'],
-      zones: [
-        { ...POS.bl, type: 'cave' },
-        { ...POS.tr, type: 'bridge' },
-        { ...POS.tc, type: 'water' },
-        { ...POS.bc, type: 'rocks' },
-        { ...POS.mr, type: 'thorns' }
-      ]
-    },
-    {
-      conditions: [
-        { text: '✗ без воды',   good: false },
-        { text: '✗ без болота', good: false },
-        { text: '✗ без скал',   good: false },
-        { text: '✗ без лавы',   good: false },
-        { text: '✓ через мост', good: true, key: 'bridge' }
-      ],
-      required: ['bridge'],
-      zones: [
-        { ...POS.cc, type: 'bridge' },
-        { ...POS.tl, type: 'water' },
-        { ...POS.bl, type: 'water' },
-        { ...POS.br, type: 'swamp' },
-        { ...POS.tr, type: 'rocks' },
-        { ...POS.bc, type: 'lava' }
-      ]
-    },
-    {
-      conditions: [
-        { text: '✓ через лес',    good: true,  key: 'forest' },
-        { text: '✓ через пещеру', good: true,  key: 'cave' },
-        { text: '✗ без воды',     good: false },
-        { text: '✗ без болота',   good: false },
-        { text: '✗ без скал',     good: false },
-        { text: '✗ без шипов',    good: false },
-        { text: '✗ без лавы',     good: false },
-        { text: '✓ через мост',   good: true,  key: 'bridge' }
-      ],
-      required: ['forest', 'cave', 'bridge'],
-      zones: [
-        { ...POS.tl, type: 'forest' },
-        { ...POS.tr, type: 'cave' },
-        { ...POS.bc, type: 'bridge' },
-        { ...POS.ml, type: 'water' },
-        { ...POS.cc, type: 'swamp' },
-        { ...POS.mr, type: 'rocks' },
-        { ...POS.bl, type: 'thorns' },
-        { ...POS.br, type: 'lava' }
-      ]
-    }
+  // Шаблоны вариантов: набор good/bad типов зон.
+  // Раскладка по позициям рандомится для каждого игрока.
+  const VARIANT_TEMPLATES = [
+    { good: ['forest', 'bridge'],                 bad: ['water', 'thorns', 'rocks'] },
+    { good: ['cave', 'bridge'],                   bad: ['water', 'swamp', 'lava'] },
+    { good: ['cave', 'bridge'],                   bad: ['water', 'rocks', 'thorns'] },
+    { good: ['forest', 'cave'],                   bad: ['water', 'swamp', 'lava'] },
+    { good: ['forest', 'cave', 'bridge'],         bad: ['water', 'swamp', 'thorns'] }
   ];
+
+  // ---------- Утилиты ----------
+  function hashStr(s) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  function makeRng(seed) {
+    let s = (seed >>> 0) || 1;
+    return function () {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+
+  function shuffle(arr, rng) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // Собираем раскладку зон под конкретного игрока.
+  // seed — числовой seed игрока, variant — 0..4.
+  function buildLayout(variantSeed, variant) {
+    const tpl = VARIANT_TEMPLATES[variant];
+    const rng = makeRng(variantSeed * 2654435761 + variant * 1009 + 13);
+
+    // Перемешиваем позиции, чтобы у каждого игрока зоны
+    // оказались в разных местах.
+    const positions = shuffle(POS_KEYS.slice(), rng);
+    const goodTypes = shuffle(tpl.good.slice(), rng);
+    const badTypes  = shuffle(tpl.bad.slice(), rng);
+
+    const zones = [];
+    let idx = 0;
+
+    goodTypes.forEach(t => {
+      const key = positions[idx++];
+      zones.push({ ...POS[key], type: t });
+    });
+    badTypes.forEach(t => {
+      const key = positions[idx++];
+      zones.push({ ...POS[key], type: t });
+    });
+
+    const conditions = [];
+    goodTypes.forEach(t => {
+      conditions.push({ text: '✓ через ' + ZONE_TYPES[t].label, good: true, key: t });
+    });
+    badTypes.forEach(t => {
+      conditions.push({ text: '✗ без ' + ZONE_TYPES[t].label, good: false });
+    });
+
+    return {
+      conditions,
+      required: goodTypes.slice(),
+      zones
+    };
+  }
 
   function open(container, seedBase, onSuccess) {
     injectStyles();
 
-    // --- HTML ---
+    // seedBase может быть числом (user id) или строкой (username).
+    // Приводим к стабильному числу.
+    const userSeed = (typeof seedBase === 'number')
+      ? (seedBase >>> 0)
+      : hashStr(String(seedBase));
+
+    // Ключ для сохранения прогресса — привязан к игроку.
+    const STORAGE_KEY = 'maze_done::' + userSeed;
+
     container.innerHTML = `
       <div class="maze-task">
         <div class="variants" id="mzVariants"></div>
         <div class="legend" id="mzLegend"></div>
         <div class="conditions" id="mzConditions"></div>
         <div class="mz-row">
+          <span>Уровни: <span class="val" id="mzVariantsDone">0 / 5</span></span>
           <span>Пройдено: <span class="val" id="mzProgress">0%</span></span>
         </div>
         <div class="stage" id="mzStage">
@@ -273,17 +307,43 @@
       </div>
     `;
 
-    const variantsWrap = container.querySelector('#mzVariants');
-    const legendEl     = container.querySelector('#mzLegend');
-    const condEl       = container.querySelector('#mzConditions');
-    const progEl       = container.querySelector('#mzProgress');
-    const stageEl      = container.querySelector('#mzStage');
-    const canvas       = container.querySelector('#mzCanvas');
-    const ctx          = canvas.getContext('2d');
-    const statusEl     = container.querySelector('#mzStatus');
+    const variantsWrap    = container.querySelector('#mzVariants');
+    const legendEl        = container.querySelector('#mzLegend');
+    const condEl          = container.querySelector('#mzConditions');
+    const progEl          = container.querySelector('#mzProgress');
+    const variantsDoneEl  = container.querySelector('#mzVariantsDone');
+    const stageEl         = container.querySelector('#mzStage');
+    const canvas          = container.querySelector('#mzCanvas');
+    const ctx             = canvas.getContext('2d');
+    const statusEl        = container.querySelector('#mzStatus');
+
+    // Прогресс (какие варианты уже пройдены)
+    let completedSet = new Set();
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) completedSet = new Set(arr.map(Number));
+      }
+    } catch (e) {}
+
+    function saveCompleted() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...completedSet])); } catch (e) {}
+    }
+
+    function updateVariantButtons() {
+      variantBtns.forEach((b, i) => {
+        const done = completedSet.has(i);
+        b.classList.toggle('done', done);
+        b.textContent = ['I','II','III','IV','V'][i] + (done ? ' ✓' : '');
+      });
+      if (variantsDoneEl) {
+        variantsDoneEl.textContent = completedSet.size + ' / ' + VARIANT_TEMPLATES.length;
+      }
+    }
 
     // Кнопки вариантов
-    const variantBtns = VARIANTS.map((_, i) => {
+    const variantBtns = VARIANT_TEMPLATES.map((_, i) => {
       const b = document.createElement('button');
       b.className = 'variant';
       b.textContent = ['I','II','III','IV','V'][i];
@@ -292,7 +352,7 @@
       return b;
     });
 
-    // --- Состояние ---
+    // ---------- Состояние ----------
     let CELL = 0;
     let grid, solution;
     let startCell = [1, 1];
@@ -304,14 +364,6 @@
     let currentVariant = 0;
     let V;
     let collected = new Set();
-
-    function makeRng(seed) {
-      let s = seed >>> 0;
-      return function () {
-        s = (s * 1664525 + 1013904223) >>> 0;
-        return s / 4294967296;
-      };
-    }
 
     function generateMaze(seed) {
       const rng = makeRng(seed * 7919 + 17);
@@ -392,13 +444,34 @@
       return null;
     }
 
+    // Проверка: реально ли можно собрать все required зоны,
+    // не заходя ни в одну bad-зону.
     function isSolvable() {
+      // 1) В каждой required-зоне должна быть хотя бы одна открытая клетка.
+      for (const reqType of V.required) {
+        let hasOpen = false;
+        for (const z of V.zones) {
+          if (z.type !== reqType) continue;
+          for (let y = z.y; y < z.y + z.h && !hasOpen; y++) {
+            for (let x = z.x; x < z.x + z.w; x++) {
+              if (x < 0 || x >= GW || y < 0 || y >= GH) continue;
+              if (grid[y][x] === 0) { hasOpen = true; break; }
+            }
+          }
+          if (hasOpen) break;
+        }
+        if (!hasOpen) return false;
+      }
+
+      // 2) DFS: путь из старта в финиш, покрывающий все required
+      //    и не заходящий в bad.
       const reqIndex = {};
       V.required.forEach((t, i) => { reqIndex[t] = i; });
       const fullMask = (1 << V.required.length) - 1;
       const vis = new Set([startCell[0] + ',' + startCell[1]]);
       let steps = 0;
-      const STEP_BUDGET = 4000;
+      const STEP_BUDGET = 6000;
+
       function dfs(x, y, mask) {
         steps++;
         if (steps > STEP_BUDGET) return false;
@@ -424,18 +497,20 @@
       return dfs(startCell[0], startCell[1], 0);
     }
 
+    // Кратчайший путь с требованием "не заходить в bad".
+    // Если avoidBad=true и пути нет — Infinity.
     function maskDistance(avoidBad) {
       const reqIndex = {};
       V.required.forEach((t, i) => { reqIndex[t] = i; });
       const fullMask = (1 << V.required.length) - 1;
-      const key = (x, y, m) => x + ',' + y + ',' + m;
+      const k = (x, y, m) => x + ',' + y + ',' + m;
       const dist = new Map();
-      dist.set(key(startCell[0], startCell[1], 0), 0);
+      dist.set(k(startCell[0], startCell[1], 0), 0);
       const queue = [[startCell[0], startCell[1], 0]];
       let qi = 0;
       while (qi < queue.length) {
         const [x, y, m] = queue[qi++];
-        const d = dist.get(key(x, y, m));
+        const d = dist.get(k(x, y, m));
         if (x === endCell[0] && y === endCell[1] && m === fullMask) return d;
         for (const [dx, dy] of [[0,-1],[1,0],[0,1],[-1,0]]) {
           const nx = x + dx, ny = y + dy;
@@ -446,28 +521,39 @@
           if (avoidBad && zt && ZONE_TYPES[zt].bad) continue;
           let nm = m;
           if (zt && reqIndex.hasOwnProperty(zt)) nm |= (1 << reqIndex[zt]);
-          const k = key(nx, ny, nm);
-          if (!dist.has(k)) { dist.set(k, d + 1); queue.push([nx, ny, nm]); }
+          const kk = k(nx, ny, nm);
+          if (!dist.has(kk)) { dist.set(kk, d + 1); queue.push([nx, ny, nm]); }
         }
       }
       return Infinity;
     }
 
+    // Обход должен быть ощутимо длиннее прямого пути.
     function directPathBlocked() {
       const dFree = maskDistance(false);
       const dAvoid = maskDistance(true);
-      return isFinite(dAvoid) && (dAvoid - dFree) >= 6;
+      return isFinite(dAvoid) && (dAvoid - dFree) >= 5;
     }
 
     function setup(variant) {
       currentVariant = variant;
       variantBtns.forEach((b, i) => b.classList.toggle('active', i === variant));
-      V = VARIANTS[variant];
+
+      // Свой seed для игрока и варианта: лабиринт + раскладка зон
+      // не повторяются ни у одного игрока.
+      const variantSeed = ((userSeed ^ (variant * 0x9E3779B1)) >>> 0) || 1;
+
+      // Раскладываем зоны под игрока.
+      V = buildLayout(variantSeed, variant);
+
       startCell = [1, 1];
       endCell = [GW - 2, GH - 2];
 
-      // seed привязан к игроку + вариант → у каждого игрока свой лабиринт
-      let seed = seedBase * 1000 + variant * 100000 + 1;
+      // Ищем лабиринт, который:
+      //   (а) проходим (есть путь через все required зоны),
+      //   (б) требует обхода (прямой путь короче на 5+ шагов),
+      //   (в) в каждой required-зоне есть открытые клетки.
+      let seed = variantSeed + 1;
       let tries = 0;
       let found = false;
       do {
@@ -475,15 +561,17 @@
         seed++;
         tries++;
         if (isSolvable() && directPathBlocked()) { found = true; break; }
-      } while (tries < 8000);
+      } while (tries < 800);
+
+      // Фолбэк — берём первый просто проходимый.
       if (!found) {
-        seed = seedBase * 1000 + variant * 100000 + 1;
+        seed = variantSeed + 1;
         tries = 0;
         do {
           generateMaze(seed);
           seed++;
           tries++;
-        } while (!isSolvable() && tries < 4000);
+        } while (!isSolvable() && tries < 400);
       }
       solution = solve();
 
@@ -496,6 +584,7 @@
 
       renderConditions();
       renderLegend();
+      updateVariantButtons();
       resize();
       draw();
       updateHud();
@@ -522,7 +611,7 @@
     function resize() {
       const rect = stageEl.getBoundingClientRect();
       const size = Math.floor(Math.min(rect.width, rect.height) - 12);
-      CELL = Math.max(14, Math.floor(size / GW));
+      CELL = Math.max(20, Math.floor(size / GW));
       const csize = CELL * GW;
       const dpr = window.devicePixelRatio || 1;
       canvas.width = csize * dpr;
@@ -552,8 +641,8 @@
           if (grid[y][x] === 1) drawWallTile(x, y);
         }
       }
-      drawGlowDot(startCell[0], startCell[1], COL.start, COL.startGlow, 0.42);
-      drawGlowDot(endCell[0], endCell[1], COL.finish, COL.finishGlow, 0.42);
+      drawGlowDot(startCell[0], startCell[1], COL.start, COL.startGlow, 0.55);
+      drawGlowDot(endCell[0], endCell[1], COL.finish, COL.finishGlow, 0.55);
       drawTrail();
     }
 
@@ -793,7 +882,7 @@
       pts.forEach(([px, py], i) => i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py));
       ctx.stroke();
       ctx.strokeStyle = COL.trail;
-      ctx.lineWidth = Math.max(3, CELL * 0.42);
+      ctx.lineWidth = Math.max(5, CELL * 0.55);
       ctx.beginPath();
       pts.forEach(([px, py], i) => i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py));
       ctx.stroke();
@@ -850,9 +939,12 @@
     function cellFromPoint(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const scale = (CELL * GW) / rect.width;
+      const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      const offY = isTouch ? 60 : 0;
       const fx = (clientX - rect.left) * scale / CELL;
-      const fy = (clientY - rect.top)  * scale / CELL;
+      const fy = (clientY - rect.top - offY) * scale / CELL;
       let x = Math.floor(fx), y = Math.floor(fy);
+
       if (y < 0 || y >= GH || x < 0 || x >= GW || grid[y][x] === 1) {
         let best = null, bestDist = Infinity;
         for (const [cx, cy] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]) {
@@ -908,19 +1000,33 @@
     function win() {
       pointerDown = false;
       const missing = V.required.filter(k => !collected.has(k));
+
       if (missing.length) {
         gameOver = true;
         statusEl.className = 'mz-status bad';
         statusEl.textContent = '✗ Дошёл до выхода, но не через все нужные места: ' +
           missing.map(k => ZONE_TYPES[k].label).join(', ') + '.';
         progEl.textContent = '100%';
-      } else {
-        won = true;
-        statusEl.className = 'mz-status good';
-        statusEl.textContent = '✓ Путь пройден. Туман расступился.';
-        progEl.textContent = '100%';
-        if (typeof onSuccess === 'function') onSuccess();
+        draw();
+        return;
       }
+
+      won = true;
+      statusEl.className = 'mz-status good';
+      progEl.textContent = '100%';
+
+      completedSet.add(currentVariant);
+      saveCompleted();
+      updateVariantButtons();
+
+      if (completedSet.size >= VARIANT_TEMPLATES.length) {
+        statusEl.textContent = '✓ Все уровни пройдены. Туман расступился.';
+        if (typeof onSuccess === 'function') onSuccess();
+      } else {
+        const left = VARIANT_TEMPLATES.length - completedSet.size;
+        statusEl.textContent = '✓ Уровень пройден. Осталось: ' + left + '. Нажми на следующий номер сверху.';
+      }
+
       draw();
     }
 
@@ -928,8 +1034,11 @@
 
     function onDown(e) {
       if (won) return;
-      const [x, y] = cellFromPoint(e.clientX, e.clientY);
-      if (x === startCell[0] && y === startCell[1]) {
+      let [x, y] = cellFromPoint(e.clientX, e.clientY);
+      const nearStart =
+        Math.abs(x - startCell[0]) <= 1 &&
+        Math.abs(y - startCell[1]) <= 1;
+      if (nearStart) {
         gameOver = false;
         pointerDown = true;
         trail = [[x, y]];
@@ -995,7 +1104,6 @@
     const resizeHandler = () => { resize(); draw(); };
     window.addEventListener('resize', resizeHandler);
 
-    // Очистка при закрытии модалки (когда container будет очищен)
     const observer = new MutationObserver(() => {
       if (!document.body.contains(container)) {
         window.removeEventListener('pointerup', onUp);
