@@ -9,15 +9,15 @@
   const BUCKET = 'reports';
 
   const SPHERES = {
-    tvorenie:  { name: 'Креативность', icon: '✎' },
-    dvizhenie: { name: 'Активность',   icon: '≈' },
-    slovo:     { name: 'Деятельность', icon: '✦' }
+    tvorenie:  { name: 'Забава',   icon: '✎' },
+    dvizhenie: { name: 'Авантюра', icon: '≈' },
+    slovo:     { name: 'Интуиция', icon: '✦' }
   };
 
   const TEAM_DAILIES = [
-    { id: 'team-d1', name: 'задание1', req: 'текст', pts: 3, dayFrom: 1, dayTo: 2 },
-    { id: 'team-d2', name: 'задание2', req: 'текст', pts: 3, dayFrom: 3, dayTo: 4 },
-    { id: 'team-d3', name: 'задание3', req: 'текст', pts: 4, dayFrom: 5, dayTo: 6 }
+    { id: 'team-d1', name: 'задание1', req: 'текст', pts: 3 },
+    { id: 'team-d2', name: 'задание2', req: 'текст', pts: 3 },
+    { id: 'team-d3', name: 'задание3', req: 'текст', pts: 4 }
   ];
 
   const PATHS = {
@@ -41,81 +41,45 @@
     kudesniki:  'Туман оставил тебе голос.\n\nТы не стал довольствоваться тем, что увидел.\n\nТы — Кудесник.'
   };
 
+  const VISION_INTRO_CARDS = [
+    { eyebrow: 'Поляна для сна',  text: 'Ты просыпаешься на поляне раньше обычного.' },
+    { eyebrow: 'Что-то не так',   text: 'Что-то не так… воздух гуще обычного, липнет очень неприятным холодом к шерсти.' },
+    { eyebrow: 'Камышовая поляна', text: 'Со стороны Камышовой поляны ползёт туман, низкий и плотный. Там должны были собрать патруль.' },
+    { eyebrow: 'Камышовая поляна', text: 'Туда и путь.' }
+  ];
+
   const VISIONS = [
-    { text: 'Ты выходишь с Поляны для сна и видишь, что туман добрался до Камышовой поляны.',
+    { text: 'На поляне пусто. Примятая трава, отпечатки лап, а патруля нет. След ведёт дальше, к первому маршруту. Тростник шуршит, пахнет тиной. У воды, где обычно греются ужи, пусто. Дальше след теряется у притока. Оттуда доносится звук… там кто-то есть.',
       options: [
-        { letter:'а', t:'Остаёшься у камышей и смотришь на очертания в дымке.', p:'likotvorcy' },
-        { letter:'б', t:'Сразу идёшь в туман искать патрульных.', p:'ratniki' },
-        { letter:'в', t:'Изучаешь следы у края поляны.', p:'kudesniki' }
+        { letter:'а', t:'Замираешь и запоминаешь, каким был этот звук, чтобы потом описать.', p:'likotvorcy' },
+        { letter:'б', t:'Идёшь вдоль воды, зовёшь патрульных.', p:'ratniki' },
+        { letter:'в', t:'Осматриваешь берег у притока. Следы обрываются у самой воды.', p:'kudesniki' }
       ] },
-    { branches: {
-        'а': { text: 'Ты возвращаешься к Поляне для сна. У Старого вяза непривычно тихо.',
-          options: [
-            { letter:'а', t:'Проходишь мимо, но замечаешь странное сочетание ветвей и теней.', p:'likotvorcy' },
-            { letter:'б', t:'Идёшь к Старому вязу.', p:'ratniki' },
-            { letter:'в', t:'Осматриваешь землю вокруг вяза.', p:'kudesniki' }
-          ] },
-        'б': { text: 'Ты выходишь на Мшистую полянку. Патрульных здесь тоже нет.',
-          options: [
-            { letter:'а', t:'Рассматриваешь оставленные вещи.', p:'likotvorcy' },
-            { letter:'б', t:'Идёшь дальше, выкрикивая имена.', p:'ratniki' },
-            { letter:'в', t:'Изучаешь следы.', p:'kudesniki' }
-          ] },
-        'в': { text: 'Следы приводят тебя к краю Камышовой поляны. В тумане появляется силуэт.',
-          options: [
-            { letter:'а', t:'Отходишь в камыши.', p:'likotvorcy' },
-            { letter:'б', t:'Подходишь к силуэту.', p:'ratniki' },
-            { letter:'в', t:'Следишь за силуэтом.', p:'kudesniki' }
-          ] }
-    } },
-    { branches: {
-        'а': { text: 'Ты выходишь к Пещере с травами. У входа никого нет.',
-          options: [
-            { letter:'а', t:'Замечаешь тени растений на камне.', p:'likotvorcy' },
-            { letter:'б', t:'Заходишь внутрь.', p:'ratniki' },
-            { letter:'в', t:'Осматриваешь землю у входа.', p:'kudesniki' }
-          ] },
-        'б': { text: 'Ты подходишь к Палатке предводителя. Рядом нет ни одного стражника.',
-          options: [
-            { letter:'а', t:'Замечаешь царапины на камне.', p:'likotvorcy' },
-            { letter:'б', t:'Входишь внутрь.', p:'ratniki' },
-            { letter:'в', t:'Изучаешь обстановку у входа.', p:'kudesniki' }
-          ] },
-        'в': { text: 'Ты подходишь к Дальнему уголку. Здесь пусто.',
-          options: [
-            { letter:'а', t:'Рассматриваешь следы.', p:'likotvorcy' },
-            { letter:'б', t:'Идёшь искать участников собрания.', p:'ratniki' },
-            { letter:'в', t:'Осматриваешь место собрания.', p:'kudesniki' }
-          ] }
-    } },
-    { intro: 'Туман начинает рассеиваться. Впереди показывается Тенистая поляна. Наконец все взгляды обращаются к тебе.',
-      branches: {
-        'а': { text: 'Ты всю ночь замечал странные вещи.',
-          options: [
-            { letter:'а', t:'Предлагаешь зарисовать всё необычное.', p:'likotvorcy' },
-            { letter:'б', t:'Предлагаешь отправить поисковую группу.', p:'ratniki' },
-            { letter:'в', t:'Предлагаешь сопоставить свидетельства.', p:'kudesniki' }
-          ] },
-        'б': { text: 'Ты всю ночь искал пропавших.',
-          options: [
-            { letter:'а', t:'Предлагаешь зарисовать силуэт.', p:'likotvorcy' },
-            { letter:'б', t:'Требуешь идти к Галечному берегу.', p:'ratniki' },
-            { letter:'в', t:'Предлагаешь расспросить свидетелей.', p:'kudesniki' }
-          ] },
-        'в': { text: 'Ты всю ночь собирал сведения.',
-          options: [
-            { letter:'а', t:'Предлагаешь записать всё увиденное.', p:'likotvorcy' },
-            { letter:'б', t:'Предлагаешь проверить опасные места.', p:'ratniki' },
-            { letter:'в', t:'Предлагаешь вступить в контакт.', p:'kudesniki' }
-          ] }
-    } }
+    { text: 'Камни мокрые, мох под лапами скользит. Дальше на тропе лежит забор, доски завалены. За ним земли, которых ты не знаешь. Густой туман, дальше почти ничего не видно. Но в нём что-то движется.',
+      options: [
+        { letter:'а', t:'Смотришь на силуэт. Запоминаешь его очертания, пока он не исчез в тумане.', p:'likotvorcy' },
+        { letter:'б', t:'Идёшь навстречу и окликаешь того, кто там движется.', p:'ratniki' },
+        { letter:'в', t:'Оглядываешься. Смотришь, откуда пришёл силуэт и куда он идёт.', p:'kudesniki' }
+      ] },
+    { text: 'Камень сменяется высокой травой. Ни птицы, ни всплеска, ни шороха. Снова видны чужие земли. Туман густеет с каждым шагом.',
+      options: [
+        { letter:'а', t:'Думаешь, какими словами опишешь эту тишину, когда вернёшься.', p:'likotvorcy' },
+        { letter:'б', t:'Пробираешься сквозь траву, не дожидаясь, пока станет ясно, что впереди.', p:'ratniki' },
+        { letter:'в', t:'Осматриваешь траву. Что-то прошло здесь, а следов нет.', p:'kudesniki' }
+      ] },
+    { text: 'Галька хрустит под лапами. Впереди уже видна поляна, с которой всё началось. Туман всё такой же густой. Внутри него видны коты у которых шерсть дыбом, кто-то дрожит, кто-то молчит и все смотрят на тебя.',
+      options: [
+        { letter:'а', t:'Пытаешься описать остальным, что ты видел.', p:'likotvorcy' },
+        { letter:'б', t:'Собираешь всех и ведёшь обратно в туман искать патруль.', p:'ratniki' },
+        { letter:'в', t:'Расспрашиваешь каждого и сопоставляешь рассказы. Ищешь совпадения.', p:'kudesniki' }
+      ] }
   ];
 
   const WAKE_STORY = [
-    { eyebrow: 'Туман рассеивается', text: 'Ты резко дёргаешься и открываешь глаза. Всё вокруг тихо.' },
-    { eyebrow: 'Пробуждение', text: 'Ты лежишь на Поляне для сна.' },
-    { eyebrow: 'Поляна для сна', text: 'Наверное, просто сон.' },
-    { eyebrow: 'Но что-то не так', text: 'Ты замечаешь туман между деревьями. Такой же, как во сне.' }
+    { eyebrow: 'Пробуждение',      text: 'Ты резко дёргаешься и открываешь глаза. Всё вокруг тихо.' },
+    { eyebrow: 'Поляна для сна',   text: 'Ты лежишь на Поляне для сна.' },
+    { eyebrow: 'Просто сон?',      text: 'Наверное, просто сон.' },
+    { eyebrow: 'Но что-то не так', text: 'Ты замечаешь туман. Такой же, как во сне.' }
   ];
 
   const ITOG_INTRO_STORY = [
@@ -123,56 +87,56 @@
     { eyebrow: 'Итог видений', text: 'Туман видел тебя так же ясно, как ты видел его.' }
   ];
 
-  // Заглушки. Когда появятся настоящие тексты — просто замени массив.
   const PREDICTIONS = Array.from({ length: 40 }, (_, i) => 'Предсказание ' + (i + 1));
 
   const TASKS_BY_LEVEL = [
     { tvorenie: [
-        { id:'l1-tv-1', name:'задание1', req:'текст', pts:2, sphere:'tvorenie' },
-        { id:'l1-tv-2', name:'задание2', req:'текст', pts:2, sphere:'tvorenie' },
-        { id:'l1-tv-3', name:'задание3', req:'текст', pts:3, sphere:'tvorenie' }
+        { id:'l1-tv-1', name:'задание1', req:'текст', pts:5, sphere:'tvorenie' },
+        { id:'l1-tv-2', name:'задание2', req:'текст', pts:5, sphere:'tvorenie' },
+        { id:'l1-tv-3', name:'задание3', req:'текст', pts:5, sphere:'tvorenie' }
       ],
       dvizhenie: [
-        { id:'l1-dv-1', name:'задание4', req:'текст', pts:2, sphere:'dvizhenie' },
-        { id:'l1-dv-2', name:'задание5', req:'текст', pts:2, sphere:'dvizhenie' },
-        { id:'l1-dv-3', name:'задание6', req:'текст', pts:3, sphere:'dvizhenie' }
+        { id:'l1-dv-1', name:'задание4', req:'текст', pts:5, sphere:'dvizhenie' },
+        { id:'l1-dv-2', name:'задание5', req:'текст', pts:5, sphere:'dvizhenie' },
+        { id:'l1-dv-3', name:'задание6', req:'текст', pts:5, sphere:'dvizhenie' }
       ],
       slovo: [
-        { id:'l1-sl-1', name:'задание7', req:'текст', pts:2, sphere:'slovo' },
-        { id:'l1-sl-2', name:'задание8', req:'текст', pts:2, sphere:'slovo' },
-        { id:'l1-sl-3', name:'задание9', req:'текст', pts:3, sphere:'slovo' }
+        { id:'l1-sl-1', name:'задание7', req:'текст', pts:5, sphere:'slovo' },
+        { id:'l1-sl-2', name:'задание8', req:'текст', pts:5, sphere:'slovo' }
       ]
     },
+
     { tvorenie: [
-        { id:'l2-tv-1', name:'задание10', req:'текст', pts:3, sphere:'tvorenie' },
-        { id:'l2-tv-2', name:'задание11', req:'текст', pts:3, sphere:'tvorenie' },
-        { id:'l2-tv-3', name:'задание12', req:'текст', pts:4, sphere:'tvorenie' }
+        { id:'l2-tv-1', name:'задание9',  req:'текст', pts:10, sphere:'tvorenie' },
+        { id:'l2-tv-2', name:'задание10', req:'текст', pts:10, sphere:'tvorenie' },
+        { id:'l2-tv-3', name:'задание11', req:'текст', pts:10, sphere:'tvorenie' }
       ],
       dvizhenie: [
-        { id:'l2-dv-1', name:'задание13', req:'текст', pts:3, sphere:'dvizhenie' },
-        { id:'l2-dv-2', name:'задание14', req:'текст', pts:3, sphere:'dvizhenie' },
-        { id:'l2-dv-3', name:'задание15', req:'текст', pts:4, sphere:'dvizhenie' }
+        { id:'l2-dv-1', name:'задание12', req:'текст', pts:10, sphere:'dvizhenie' },
+        { id:'l2-dv-2', name:'задание13', req:'текст', pts:10, sphere:'dvizhenie' }
       ],
       slovo: [
-        { id:'l2-sl-1', name:'задание16', req:'текст', pts:3, sphere:'slovo' },
-        { id:'l2-sl-2', name:'задание17', req:'текст', pts:3, sphere:'slovo' },
-        { id:'l2-sl-3', name:'задание18', req:'текст', pts:4, sphere:'slovo' }
+        { id:'l2-sl-1', name:'задание14', req:'текст', pts:10, sphere:'slovo' },
+        { id:'l2-sl-2', name:'задание15', req:'текст', pts:10, sphere:'slovo' },
+        { id:'l2-sl-3', name:'задание16', req:'текст', pts:10, sphere:'slovo' }
       ]
     },
+
     { tvorenie: [
-        { id:'l3-tv-1', name:'задание19', req:'текст', pts:4, sphere:'tvorenie' },
-        { id:'l3-tv-2', name:'задание20', req:'текст', pts:5, sphere:'tvorenie' }
+        { id:'l3-tv-1', name:'задание17', req:'текст', pts:15, sphere:'tvorenie' },
+        { id:'l3-tv-2', name:'задание18', req:'текст', pts:15, sphere:'tvorenie' }
       ],
       dvizhenie: [
-        { id:'l3-dv-1', name:'задание21', req:'текст', pts:4, sphere:'dvizhenie' },
-        { id:'l3-dv-2', name:'задание22', req:'текст', pts:5, sphere:'dvizhenie' }
+        { id:'l3-dv-1', name:'задание19', req:'текст', pts:15, sphere:'dvizhenie' },
+        { id:'l3-dv-2', name:'задание20', req:'текст', pts:15, sphere:'dvizhenie' }
       ],
       slovo: [
-        { id:'l3-sl-1', name:'задание23', req:'текст', pts:4, sphere:'slovo' },
-        { id:'l3-sl-2', name:'задание24', req:'текст', pts:5, sphere:'slovo' },
+        { id:'l3-sl-1', name:'задание21', req:'текст', pts:15, sphere:'slovo' },
+        { id:'l3-sl-2', name:'задание22', req:'текст', pts:15, sphere:'slovo' },
+        { id:'l3-sl-3', name:'задание23', req:'текст', pts:15, sphere:'slovo' },
         {
           id: 'l3-in-1',
-          name: 'Загадки тумана',
+          name: 'название1',
           req: 'Разгадай пять загадок и собери слово из букв.',
           pts: 15,
           sphere: 'slovo',
@@ -219,25 +183,12 @@
       .replace(/[^a-zа-я0-9]/g, '');
   }
 
-    function escapeHtml(str) {
-    return String(str == null ? '' : str).replace(/[&<>"']/g, ch => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[ch]));
-  }
-  function round1(n) { return Math.round(n * 10) / 10; }
-  function norm(s) {
-    return String(s || '').toLowerCase().trim()
-      .replace(/ё/g, 'е')
-      .replace(/[^a-zа-я0-9]/g, '');
-  }
-
   async function hashPin(pin) {
     const text = 'tuman::' + pin;
     if (window.crypto && crypto.subtle && crypto.subtle.digest) {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
-    // fallback на случай file:// или старого браузера
     let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
     for (let i = 0; i < text.length; i++) {
       const ch = text.charCodeAt(i);
@@ -281,7 +232,7 @@
     users = Object.fromEntries((uRes.data || []).map(r => [r.id, {
       id: r.id, name: r.name, path: r.path,
       teamId: r.team_id, isAdmin: !!r.is_admin,
-      frozen: !!r.frozen, approved: !!r.approved,
+      approved: !!r.approved,
       pinHash: r.pin_hash || null
     }]));
 
@@ -342,7 +293,7 @@
       id: u.id, name: u.name, path: u.path,
       team_id: u.teamId || null,
       is_admin: !!u.isAdmin,
-      frozen: !!u.frozen,
+      frozen: false,
       approved: u.approved !== false,
       pin_hash: u.pinHash || null
     });
@@ -355,7 +306,7 @@
       id: u.id, name: u.name, path: u.path,
       team_id: u.teamId || null,
       is_admin: !!u.isAdmin,
-      frozen: !!u.frozen,
+      frozen: false,
       approved: u.approved !== false,
       pin_hash: u.pinHash || null
     })));
@@ -422,7 +373,7 @@
 
   async function autoPlaceInTeam(uid) {
     const user = users[uid];
-    if (!user || user.frozen || !user.approved) return;
+    if (!user || !user.approved) return;
     let target = Object.values(teams).find(t => t.members.length < TEAM_SIZE);
     if (target) {
       if (target.members.indexOf(uid) === -1) {
@@ -517,7 +468,6 @@
     positionRiddle();
   }
 
-  // Загадка всегда привязана к первому корневому заданию, чтобы не висеть в воздухе.
   function positionRiddle() {
     const riddle = ALL_TASKS.find(t => t.type === 'riddle');
     if (!riddle) return;
@@ -530,13 +480,43 @@
     Object.keys(depthCache).forEach(k => delete depthCache[k]);
   }
 
+  let TREE_CTX = null;
+
+  function starterTaskFor(u) {
+    if (!u || !u.path) return null;
+    const path = PATHS[u.path];
+    if (!path) return null;
+
+    const pool = ALL_TASKS.filter(t => t.level === 0 && t.sphere === path.buffSphere);
+    if (!pool.length) return null;
+
+    const seedKey = (u.teamId || u.id) + '::' + path.buffSphere;
+    const h = hashStr('starter::' + seedKey);
+    return pool[h % pool.length].id;
+  }
+
+  function buildUserTree(u) {
+    const starterId = starterTaskFor(u);
+    const rootId = TASK_ORDER[0];
+    if (!starterId || starterId === rootId || TASK_ORDER.indexOf(starterId) === -1) {
+      return { order: TASK_ORDER, depends: TASK_DEPENDS, depthCache: {} };
+    }
+    const depends = Object.assign({}, TASK_DEPENDS);
+    depends[starterId] = null;
+    depends[rootId] = { any: [starterId] };
+    return { order: TASK_ORDER, depends, depthCache: {} };
+  }
+
   function taskDepth(id) {
-    if (depthCache[id] !== undefined) return depthCache[id];
-    depthCache[id] = 0;
-    const dep = TASK_DEPENDS[id];
+    const ctx = TREE_CTX;
+    const depends = ctx ? ctx.depends : TASK_DEPENDS;
+    const cache = ctx ? ctx.depthCache : depthCache;
+    if (cache[id] !== undefined) return cache[id];
+    cache[id] = 0;
+    const dep = depends[id];
     const ids = dep ? (dep.any || dep.all || []) : [];
     const d = ids.length ? Math.max.apply(null, ids.map(taskDepth)) + 1 : 0;
-    depthCache[id] = d;
+    cache[id] = d;
     return d;
   }
 
@@ -546,8 +526,9 @@
   }
 
   function isTaskUnlockedByDeps(u, task) {
+    const depends = TREE_CTX ? TREE_CTX.depends : TASK_DEPENDS;
     if (getTaskState(u, task).status !== 'none') return true;
-    const dep = TASK_DEPENDS[task.id];
+    const dep = depends[task.id];
     if (!dep) return true;
     const ids = dep.any || dep.all || [];
     if (!ids.length) return true;
@@ -592,9 +573,6 @@
     return round1(sum);
   }
 
-  function isDailyInWindow(daily, day) { return day >= daily.dayFrom && day <= daily.dayTo; }
-  function dailyWindowLabel(daily) { return 'дни ' + daily.dayFrom + '–' + daily.dayTo; }
-
   function getCurrentDay() {
     const start = eventSettings.event_start || Date.now();
     const offset = eventSettings.dev_offset || 0;
@@ -621,11 +599,6 @@
     if (!u.approved && !u.isAdmin) {
       $('#pendingName').textContent = 'Тебя ждёт туман, ' + u.name;
       showScreen('screen-pending');
-      return;
-    }
-    if (u.frozen && !u.isAdmin) {
-      showScreen('screen-dashboard');
-      renderDashboard();
       return;
     }
     if (u.path) { showScreen('screen-dashboard'); renderDashboard(); }
@@ -656,7 +629,7 @@
     }
 
     $('#btnStartAuth').addEventListener('click', async () => {
-      if (!dataReady) { toast('Секунду, связываюсь с туманом...'); return; }
+      if (!dataReady) { toast('Загружается…'); return; }
       const name = $('#inputName').value.trim();
       const id = $('#inputId').value.trim();
       const pin = $('#inputPin').value.trim();
@@ -684,18 +657,17 @@
       const isNew = !u;
 
       if (u && u.pinHash && u.pinHash !== pinHash) {
-        fail('Неверный пароль. Забыл — попроси модератора сбросить.');
+        fail('Неверный пароль. Забыл — попроси ответственного сбросить.');
         return;
       }
 
       if (u) {
         u.name = finalName;
-        // либо миграция (старый юзер без пароля), либо просто обновление имени
         if (!u.pinHash) u.pinHash = pinHash;
       } else {
         u = {
           id, name: finalName, path: null, teamId: null,
-          isAdmin: false, frozen: false, approved: false,
+          isAdmin: false, approved: false,
           pinHash
         };
       }
@@ -727,7 +699,7 @@
         users[data.id] = {
           id: data.id, name: data.name, path: data.path,
           teamId: data.team_id, isAdmin: !!data.is_admin,
-          frozen: !!data.frozen, approved: !!data.approved,
+          approved: !!data.approved,
           pinHash: data.pin_hash || null
         };
         if (data.approved) {
@@ -739,7 +711,6 @@
       }
       toast('Ещё не подтверждено');
     });
-
   }
 
   function updateToggleDoneBtn() {
@@ -757,10 +728,13 @@
     if (!wrap) return;
     wrap.innerHTML = '';
 
+    TREE_CTX = buildUserTree(u);
+    const order = TREE_CTX.order;
+
     const byDepth = {};
     let activeDepth = 0;
 
-    TASK_ORDER.forEach(id => {
+    order.forEach(id => {
       const t = ALL_TASKS.find(x => x.id === id);
       if (!t) return;
       if (!showCompleted && getTaskState(u, t).status === 'approved') return;
@@ -770,14 +744,14 @@
       }
     });
 
-    TASK_ORDER.forEach(id => {
+    order.forEach(id => {
       const t = ALL_TASKS.find(x => x.id === id);
       if (!t) return;
       if (!showCompleted && getTaskState(u, t).status === 'approved') return;
       const d = taskDepth(id);
       if (d > activeDepth + 2) return;
       if (d === activeDepth + 2) {
-        const dep = TASK_DEPENDS[id];
+        const dep = TREE_CTX.depends[id];
         if (dep) {
           const parentIds = dep.any || dep.all || [];
           const parentVisible = parentIds.some(pid => {
@@ -905,7 +879,7 @@
     const orb = document.createElement('div');
     orb.className = 'locked-orb';
     orb.innerHTML = '<span class="lo-icon">' + sphere.icon + '</span>';
-    orb.addEventListener('click', () => toast('Скрыто туманом — отправь предыдущий отчёт, чтобы это открылось'));
+    orb.addEventListener('click', () => toast('Сделай предыдущее задание, чтобы это открылось'));
     return orb;
   }
 
@@ -943,6 +917,9 @@
   }
 
   function drawTreeLines(u, svg, container, nodeEls) {
+    const order = TREE_CTX ? TREE_CTX.order : TASK_ORDER;
+    const depends = TREE_CTX ? TREE_CTX.depends : TASK_DEPENDS;
+
     const crect = container.getBoundingClientRect();
     svg.setAttribute('width', container.scrollWidth);
     svg.setAttribute('height', container.scrollHeight);
@@ -961,8 +938,8 @@
       };
     });
 
-    TASK_ORDER.forEach(taskId => {
-      const dep = TASK_DEPENDS[taskId];
+    order.forEach(taskId => {
+      const dep = depends[taskId];
       if (!dep) return;
       const ids = dep.any || dep.all || [];
       ids.forEach(pid => {
@@ -1070,13 +1047,13 @@
   function renderEditableForm(state, placeholder) {
     return ''
       + '<div class="field">'
-      +   '<label>Ответ / описание отчёта</label>'
+      +   '<label>Ответ</label>'
       +   '<textarea id="modalAnswer" rows="4" placeholder="'
-      +      escapeHtml(placeholder || 'Опиши, что удалось сделать') + '">'
+      +      escapeHtml(placeholder || '') + '">'
       +      escapeHtml(state.answer || '') + '</textarea>'
       + '</div>'
       + '<div class="field">'
-      +   '<label>Фото / скриншоты</label>'
+      +   '<label>Изображение / скриншоты</label>'
       +   imageUploadBlock(state)
       + '</div>';
   }
@@ -1091,24 +1068,17 @@
 
     if (state.status === 'pending') {
       statusArea = ''
-        + '<div class="submission-view">'
-        + (state.image ? '<img src="' + state.image + '" class="img-preview">' : '')
-        + '<p class="lore-text">' + escapeHtml(state.answer || '(без текста)') + '</p></div>'
-        + '<p class="status-note pending">Туман изучает твой отчёт... жди решения хранителей.</p>'
-        + '<button class="btn btn-ghost" id="btnWithdraw">Отозвать и изменить</button>';
+        + '<p class="status-note pending">Проверяется твой отчёт...</p>'
+        + '<button class="btn btn-ghost" id="btnWithdraw">Отменить и внести правки</button>';
     } else if (state.status === 'approved') {
-      statusArea = ''
-        + '<div class="submission-view">'
-        + (state.image ? '<img src="' + state.image + '" class="img-preview">' : '')
-        + '<p class="lore-text">' + escapeHtml(state.answer || '(без текста)') + '</p></div>'
-        + '<p class="status-note approved">Задание принято. Получено баллов: <b>' + finalPts + '</b></p>';
+      statusArea = '<p class="status-note approved">Задание принято. Получено баллов: <b>' + finalPts + '</b></p>';
     } else if (state.status === 'rejected') {
       statusArea = '<p class="status-note rejected">Отклонено: ' + escapeHtml(state.reason || 'без указания причины') + '</p>'
         + renderEditableForm(state)
         + '<button class="btn btn-primary" id="btnSubmitTask" style="margin-top:14px;">Отправить заново</button>';
     } else {
       statusArea = renderEditableForm(state)
-        + '<button class="btn btn-primary" id="btnSubmitTask" style="margin-top:14px;">Отправить в туман</button>';
+        + '<button class="btn btn-primary" id="btnSubmitTask" style="margin-top:14px;">Отправить</button>';
     }
 
     $('#taskModalBody').innerHTML = ''
@@ -1143,14 +1113,13 @@
         + '<h3 class="display modal-title">' + escapeHtml(task.name) + '</h3></div></div>'
         + '<div class="riddle-solved-note">'
         +   '<div class="big">Загадки разгаданы</div>'
-        +   '<div class="small">Ты собрал слово «' + escapeHtml(task.finalWord) + '» и получил <b>' + task.pts + '</b> баллов.</div>'
+        +   '<div class="small">Ты собрал слово «' + escapeHtml(task.finalWord) + '» и решил задание.</div>'
         + '</div>';
       return;
     }
 
     const letters = task.riddles.map(r => r.letter);
 
-    // Индексы букв перемешиваем, чтобы слово не читалось слева направо.
     const displayOrder = letters.map((_, i) => i);
     for (let i = displayOrder.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1184,7 +1153,7 @@
       + '<div class="final-word-block" id="finalWordBlock" style="display:none;">'
       +   '<p class="final-word-hint">Собери слово из букв и впиши его.</p>'
       +   '<input type="text" class="final-word-input" id="finalWordInput" placeholder="СЛОВО" autocomplete="off">'
-      +   '<button class="btn btn-primary" id="btnSubmitRiddle" style="max-width:280px;margin:0 auto;display:block;">Разгадать туман</button>'
+      +   '<button class="btn btn-primary" id="btnSubmitRiddle" style="max-width:280px;margin:0 auto;display:block;">Разгадать</button>'
       + '</div>';
 
     const solvedSet = new Set();
@@ -1264,38 +1233,24 @@
 
   function renderDailyModalContent(u, team, daily) {
     const state = getDailyState(team, daily.id);
-    const day = getCurrentDay();
-    const inWindow = isDailyInWindow(daily, day);
     const activeCount = team.members.length;
     let statusArea = '';
 
-    if (!inWindow && state.status === 'none') {
-      const before = day < daily.dayFrom;
-      statusArea = '<p class="window-note closed">'
-        + (before
-            ? 'Задание откроется в день ' + daily.dayFrom + '. Сейчас день ' + day + '.'
-            : 'Время отчёта по этому заданию истекло (дни ' + daily.dayFrom + '–' + daily.dayTo + ').')
-        + '</p>';
-    } else if (state.status === 'none') {
+    if (state.status === 'none') {
       statusArea = ''
-        + '<p class="window-note active">Открыто для отчёта: дни ' + daily.dayFrom + '–' + daily.dayTo + '. Сейчас день ' + day + '. Участников: ' + activeCount + '.</p>'
         + '<div class="field">'
         +   '<label>Формат отчёта</label>'
         +   '<select id="modalReportMode">'
-        +     '<option value="each">Каждый отчитался отдельно</option>'
+        +     '<option value="each">Каждый отписывается отдельно</option>'
         +     '<option value="all">Один собрал все отчёты</option>'
         +   '</select>'
         + '</div>'
         + renderEditableForm(state)
-        + '<button class="btn btn-primary" id="btnSubmitDaily" style="margin-top:14px;">Отправить в туман</button>';
+        + '<button class="btn btn-primary" id="btnSubmitDaily" style="margin-top:14px;">Отправить</button>';
     } else if (state.status === 'pending') {
       statusArea = ''
-        + '<div class="submission-view">'
-        + '<span class="report-mode-tag">' + (state.reportMode === 'all' ? 'один за всех' : 'каждый свой') + '</span>'
-        + (state.image ? '<img src="' + state.image + '" class="img-preview">' : '')
-        + '<p class="lore-text">' + escapeHtml(state.answer || '(без текста)') + '</p></div>'
         + '<p class="status-note pending">Отчёт изучается хранителями.</p>'
-        + (inWindow ? '<button class="btn btn-ghost" id="btnWithdrawDaily">Отозвать и изменить</button>' : '');
+        + '<button class="btn btn-ghost" id="btnWithdrawDaily">Отозвать и изменить</button>';
     } else if (state.status === 'approved') {
       statusArea = ''
         + '<div class="submission-view">'
@@ -1304,29 +1259,24 @@
         + '<p class="lore-text">' + escapeHtml(state.answer || '(без текста)') + '</p></div>'
         + '<p class="status-note approved">Принято. Каждый участник получил <b>' + daily.pts + '</b> б.</p>';
     } else if (state.status === 'rejected') {
-      statusArea = '<p class="status-note rejected">Отклонено: ' + escapeHtml(state.reason || 'без указания причины') + '</p>';
-      if (inWindow) {
-        statusArea += ''
-          + '<div class="field">'
-          +   '<label>Формат отчёта</label>'
-          +   '<select id="modalReportMode">'
-          +     '<option value="each"' + (state.reportMode === 'each' ? ' selected' : '') + '>Каждый отчитался отдельно</option>'
-          +     '<option value="all"'  + (state.reportMode === 'all'  ? ' selected' : '') + '>Один собрал все отчёты</option>'
-          +   '</select>'
-          + '</div>'
-          + renderEditableForm(state)
-          + '<button class="btn btn-primary" id="btnSubmitDaily" style="margin-top:14px;">Отправить заново</button>';
-      } else {
-        statusArea += '<p class="window-note closed">Время отчёта истекло, изменить уже нельзя.</p>';
-      }
+      statusArea = '<p class="status-note rejected">Отклонено: ' + escapeHtml(state.reason || 'без указания причины') + '</p>'
+        + '<div class="field">'
+        +   '<label>Формат отчёта</label>'
+        +   '<select id="modalReportMode">'
+        +     '<option value="each"' + (state.reportMode === 'each' ? ' selected' : '') + '>Каждый отписывается отдельно</option>'
+        +     '<option value="all"'  + (state.reportMode === 'all'  ? ' selected' : '') + '>Один собрал все отчёты</option>'
+        +   '</select>'
+        + '</div>'
+        + renderEditableForm(state)
+        + '<button class="btn btn-primary" id="btnSubmitDaily" style="margin-top:14px;">Отправить заново</button>';
     }
 
     $('#taskModalBody').innerHTML = ''
       + '<div class="modal-head"><div class="modal-icon">✦</div><div>'
-      + '<div class="modal-eyebrow">командный дейлик · ' + dailyWindowLabel(daily) + ' · ' + activeCount + ' уч.</div>'
+      + '<div class="modal-eyebrow">командное задание · ' + activeCount + ' уч.</div>'
       + '<h3 class="display modal-title">' + escapeHtml(daily.name) + '</h3></div></div>'
       + '<p class="lore-text muted modal-req">' + escapeHtml(daily.req) + '</p>'
-      + '<div class="modal-points">баллы каждому участнику: ' + daily.pts + ' · отчёт один на команду</div>'
+      + '<div class="modal-points">баллы каждому участнику: ' + daily.pts + ' · мяу</div>'
       + statusArea;
 
     attachImageZoom($('#taskModalBody'));
@@ -1386,7 +1336,7 @@
     const answer = readModalAnswer();
     const existing = getTaskState(u, task);
     const file = readModalFile();
-    if (!answer && !file && !existing.image) { toast('Добавь описание или фото отчёта'); return; }
+    if (!answer && !file && !existing.image) { toast('Добавь ответ или изображение'); return; }
 
     let imageUrl = existing.image || null;
     if (file) {
@@ -1405,20 +1355,18 @@
       submittedBy: u.name, submittedAt: Date.now()
     });
 
-    toast('Отчёт отправлен в туман...');
+    toast('Отчёт отправлен...');
     closeTaskModal();
     renderDashboard();
   }
 
   async function handleSubmitDaily(u, team, daily) {
-    const day = getCurrentDay();
-    if (!isDailyInWindow(daily, day)) { toast('Задание закрыто'); return; }
     const answer = readModalAnswer();
     const existing = getDailyState(team, daily.id);
     const file = readModalFile();
     const modeEl = document.getElementById('modalReportMode');
     const reportMode = modeEl ? modeEl.value : 'each';
-    if (!answer && !file && !existing.image) { toast('Добавь описание или фото отчёта'); return; }
+    if (!answer && !file && !existing.image) { toast('Добавь ответ или изображение'); return; }
 
     let imageUrl = existing.image || null;
     if (file) {
@@ -1439,7 +1387,7 @@
     };
     await upsertTeam(team);
 
-    toast('Отчёт отправлен в туман...');
+    toast('Отчёт отправлен...');
     closeTaskModal();
     renderDashboard();
   }
@@ -1494,9 +1442,7 @@
       const pred = PREDICTIONS[todayDraw.idx] || '';
       stageHTML = ''
         + '<div class="prediction-reveal">'
-        +   '<div class="prediction-decor">✦ ◈ ✦</div>'
         +   '<div class="prediction-text">' + escapeHtml(pred) + '</div>'
-        +   '<div class="prediction-meta">день ' + day + ' · палочка вытянута</div>'
         + '</div>';
     } else {
       stageHTML = ''
@@ -1598,6 +1544,10 @@
     subs.forEach(s => {
       const entry = document.createElement('div');
       entry.className = 'admin-entry';
+      entry.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-approve, .btn-reject, img')) return;
+        openReportModal(s);
+      });
       let actionsHtml;
       if (s.state.status === 'pending') {
         actionsHtml = '<div class="admin-entry-actions"><button class="btn-approve" data-act="approve">Принять</button><button class="btn-reject" data-act="reject">Отклонить</button></div>';
@@ -1632,6 +1582,86 @@
       list.appendChild(entry);
     });
     attachImageZoom(list);
+  }
+
+  function openReportModal(s) {
+    const body = $('#reportModalBody');
+    if (!body) return;
+
+    let headHtml, reqHtml, pointsHtml;
+
+    if (s.kind === 'task') {
+      const sphere = SPHERES[s.task.sphere];
+      headHtml =
+        '<div class="modal-head"><div class="modal-icon">' + sphere.icon + '</div><div>'
+        + '<div class="modal-eyebrow">' + sphere.name + ' · уровень ' + (s.task.level + 1) + '</div>'
+        + '<h3 class="display modal-title">' + escapeHtml(s.task.name) + '</h3></div></div>';
+      reqHtml = '<p class="lore-text muted modal-req">' + escapeHtml(s.task.req) + '</p>';
+      pointsHtml = '<div class="modal-points">баллы за задание: ' + s.task.pts + '</div>';
+    } else {
+      headHtml =
+        '<div class="modal-head"><div class="modal-icon">✦</div><div>'
+        + '<div class="modal-eyebrow">командное задание</div>'
+        + '<h3 class="display modal-title">' + escapeHtml(s.daily.name) + '</h3></div></div>';
+      reqHtml = '<p class="lore-text muted modal-req">' + escapeHtml(s.daily.req) + '</p>';
+      pointsHtml = '<div class="modal-points">баллы каждому: ' + s.daily.pts
+        + ' · ' + (s.state.reportMode === 'all' ? 'один за всех' : 'каждый свой') + '</div>';
+    }
+
+    const submittedDate = s.state.submittedAt
+      ? new Date(s.state.submittedAt).toLocaleString('ru-RU')
+      : '—';
+    const statusLabel = { pending: 'на проверке', approved: 'принято', rejected: 'отклонено' }[s.state.status] || '';
+
+    let actionsHtml;
+    if (s.state.status === 'pending') {
+      actionsHtml =
+        '<div class="admin-entry-actions" style="margin-top:18px;">'
+        + '<button class="btn-approve" id="reportModalApprove">Принять</button>'
+        + '<button class="btn-reject" id="reportModalReject">Отклонить</button>'
+        + '</div>';
+    } else {
+      const tag = { approved: 'принято', rejected: 'отклонено' }[s.state.status] || '';
+      actionsHtml = '<div style="margin-top:18px;"><span class="admin-decided-tag ' + s.state.status + '">' + tag + '</span></div>';
+    }
+
+    body.innerHTML =
+      headHtml
+      + reqHtml
+      + pointsHtml
+      + '<div class="report-meta">'
+      +   '<span><span class="rm-label">Кто:</span> ' + escapeHtml(s.label) + '</span>'
+      +   '<span><span class="rm-label">Отправлено:</span> ' + submittedDate + '</span>'
+      +   '<span><span class="rm-label">Статус:</span> ' + statusLabel + '</span>'
+      + '</div>'
+      + '<div class="submission-view">'
+      +   (s.state.image ? '<img src="' + s.state.image + '" class="img-preview js-zoomable" alt="Отчёт">' : '')
+      +   '<p class="lore-text">' + (s.state.answer ? escapeHtml(s.state.answer) : '<i>без текста</i>') + '</p>'
+      + '</div>'
+      + (s.state.status === 'rejected'
+          ? '<div class="status-note rejected">Причина: ' + escapeHtml(s.state.reason || '—') + '</div>'
+          : '')
+      + actionsHtml;
+
+    attachImageZoom(body);
+
+    const approveBtn = $('#reportModalApprove');
+    const rejectBtn  = $('#reportModalReject');
+    if (approveBtn) approveBtn.addEventListener('click', async () => {
+      closeReportModal();
+      await adminDecide(s, 'approved');
+    });
+    if (rejectBtn) rejectBtn.addEventListener('click', async () => {
+      closeReportModal();
+      openRejectModal(s);
+    });
+
+    $('#reportModalBackdrop').classList.add('open');
+  }
+
+  function closeReportModal() {
+    const b = document.getElementById('reportModalBackdrop');
+    if (b) b.classList.remove('open');
   }
 
   let pendingRejectSubmission = null;
@@ -1733,22 +1763,15 @@
       return na - nb;
     });
 
-    const head = document.createElement('div');
-    head.style.marginBottom = '14px';
-    head.innerHTML = '<button class="btn btn-ghost" id="btnCompactTeams" style="width:auto;padding:9px 16px;font-size:13px;">Пересобрать команды</button>';
-    wrap.appendChild(head);
-
     if (!teamIds.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-hint';
       empty.textContent = 'Пока нет ни одной команды.';
       wrap.appendChild(empty);
-      const cBtn0 = $('#btnCompactTeams');
-      if (cBtn0) cBtn0.addEventListener('click', compactTeams);
       return;
     }
 
-    const freeUsers = Object.values(users).filter(u => !u.isAdmin && !u.teamId && !u.frozen && u.approved);
+    const freeUsers = Object.values(users).filter(u => !u.isAdmin && !u.teamId && u.approved);
 
     teamIds.forEach(tid => {
       const team = teams[tid];
@@ -1773,16 +1796,15 @@
             return;
           }
           let badges = '';
-          if (m.isAdmin) badges += '<span class="te-user-badge admin">модератор</span>';
+          if (m.isAdmin) badges += '<span class="te-user-badge admin">ответственный</span>';
           membersHTML += ''
-            + '<div class="te-user' + (m.frozen ? ' frozen' : '') + '">'
+            + '<div class="te-user">'
             +   '<div class="te-user-info">'
             +     '<span class="te-user-name">' + escapeHtml(m.name) + '</span>'
             +     '<span class="te-user-id">' + escapeHtml(m.id) + '</span>'
             +     badges
             +   '</div>'
             +   '<div class="te-user-actions">'
-            +     '<button class="te-btn" data-act="freeze" data-uid="' + escapeHtml(m.id) + '">Заморозить</button>'
             +     '<button class="te-btn danger" data-act="remove" data-uid="' + escapeHtml(m.id) + '">Убрать</button>'
             +     '<button class="te-btn danger" data-act="delete" data-uid="' + escapeHtml(m.id) + '">Удалить</button>'
             +   '</div>'
@@ -1814,7 +1836,6 @@
           const act = btn.dataset.act;
           const uid = btn.dataset.uid;
           if (act === 'remove') await teamRemoveUser(tid, uid);
-          else if (act === 'freeze') await teamFreezeUser(uid);
           else if (act === 'delete') await deleteUser(uid);
           else if (act === 'add') {
             const sel = block.querySelector('.te-add-select');
@@ -1824,9 +1845,6 @@
         });
       });
     });
-
-    const cBtn = $('#btnCompactTeams');
-    if (cBtn) cBtn.addEventListener('click', compactTeams);
   }
 
   async function teamRemoveUser(teamId, uid) {
@@ -1843,30 +1861,6 @@
     renderDashboard();
   }
 
-  async function teamFreezeUser(uid) {
-    const u = users[uid];
-    if (!u) return;
-    if (u.frozen) {
-      u.frozen = false;
-      await upsertUser(u);
-      toast('Разморожен');
-    } else {
-      for (const tid of Object.keys(teams)) {
-        const t = teams[tid];
-        if (t.members.indexOf(uid) !== -1) {
-          t.members = t.members.filter(x => x !== uid);
-          await upsertTeam(t);
-        }
-      }
-      u.frozen = true;
-      u.teamId = null;
-      await upsertUser(u);
-      toast('Заморожен');
-    }
-    renderModTeams();
-    renderDashboard();
-  }
-
   async function teamAddUser(teamId, uid) {
     const team = teams[teamId];
     const u = users[uid];
@@ -1878,7 +1872,6 @@
     }
     team.members.push(uid);
     u.teamId = teamId;
-    u.frozen = false;
     await upsertTeam(team);
     await upsertUser(u);
     toast('Добавлен в команду');
@@ -1889,7 +1882,7 @@
   async function deleteUser(uid) {
     const u = users[uid];
     if (!u) return;
-    if (uid === ADMIN_CODE) { toast('Главного модератора удалить нельзя'); return; }
+    if (uid === ADMIN_CODE) { toast('Удалить нельзя'); return; }
     if (session.userId === uid) { toast('Нельзя удалить себя'); return; }
     if (!confirm('Удалить игрока «' + (u.name || uid) + '»? Действие необратимо.')) return;
 
@@ -1920,7 +1913,7 @@
     if (!confirm('Пересобрать команды заново? Прогресс по командным дейликам сбросится.')) return;
 
     const active = regOrder.filter(uid =>
-      users[uid] && !users[uid].frozen && users[uid].approved
+      users[uid] && users[uid].approved
     );
 
     for (const tid of Object.keys(teams)) {
@@ -1957,8 +1950,6 @@
     const admins = all.filter(u => u.isAdmin);
     const regular = all.filter(u => !u.isAdmin && u.approved);
 
-    wrap.innerHTML = '<p class="lore-text muted" style="margin-bottom:16px;">Модераторы могут принимать отчёты, управлять командами и выдавать права другим. Новые заявки приходят в самый верхний блок.</p>';
-
     const selfId = currentUser() ? currentUser().id : null;
 
     function buildGroup(title, list, emptyText, buildActions) {
@@ -1970,11 +1961,10 @@
       } else {
         list.forEach(u => {
           html += ''
-            + '<div class="te-user' + (u.frozen ? ' frozen' : '') + '">'
+            + '<div class="te-user">'
             +   '<div class="te-user-info">'
             +     '<span class="te-user-name">' + escapeHtml(u.name || '—') + '</span>'
             +     '<span class="te-user-id">' + escapeHtml(u.id) + '</span>'
-            +     (u.frozen ? '<span class="te-user-badge frozen">заморожен</span>' : '')
             +   '</div>'
             +   '<div class="te-user-actions">' + buildActions(u) + '</div>'
             + '</div>';
@@ -1996,7 +1986,7 @@
     ));
 
     wrap.appendChild(buildGroup(
-      'С правами модератора',
+      'С правами',
       admins,
       'Пока никого.',
       u => {
@@ -2007,7 +1997,7 @@
           ? '<button class="te-btn" data-act="resetpin" data-uid="' + escapeHtml(u.id) + '">Сбросить пароль</button>' : '';
         const main = canRemoveRoot
           ? '<button class="te-btn danger" data-act="demote" data-uid="' + escapeHtml(u.id) + '">Снять права</button>'
-          : '<span class="te-user-id">главный</span>';
+          : '<span class="te-user-id">мяу</span>';
         return main + reset + del;
       }
     ));
@@ -2021,7 +2011,7 @@
           ? '<button class="te-btn danger" data-act="delete" data-uid="' + escapeHtml(u.id) + '">Удалить</button>' : '';
         const reset = u.pinHash
           ? '<button class="te-btn" data-act="resetpin" data-uid="' + escapeHtml(u.id) + '">Сбросить пароль</button>' : '';
-        return '<button class="te-btn gold" data-act="promote" data-uid="' + escapeHtml(u.id) + '">Сделать модератором</button>' + reset + del;
+        return '<button class="te-btn gold" data-act="promote" data-uid="' + escapeHtml(u.id) + '">Сделать ответственным</button>' + reset + del;
       }
     ));
 
@@ -2057,17 +2047,11 @@
     const wrap = $('#teamPanelWrap');
     if (!wrap) return;
 
-    if (u.frozen && !u.isAdmin) {
-      wrap.innerHTML = '<div class="frozen-notice">Ты заморожен модераторами. Отчёты временно недоступны.</div>';
-      return;
-    }
-
     const team = u.teamId ? teams[u.teamId] : null;
     if (!team) { wrap.innerHTML = '<div class="stub-block">Ты пока не в команде.</div>'; return; }
 
     const day = getCurrentDay();
     const members = team.members;
-    const personalSum = members.reduce((s, mid) => s + (users[mid] ? personalScore(users[mid]) : 0), 0);
     const activeCount = members.length;
 
     let membersHTML = '';
@@ -2086,29 +2070,19 @@
     let dailiesHTML = '';
     TEAM_DAILIES.forEach(d => {
       const st = getDailyState(team, d.id);
-      const inWindow = isDailyInWindow(d, day);
-      const before = day < d.dayFrom;
-      const after  = day > d.dayTo;
 
-      let cardClass = 'daily-card';
+      let cardClass = 'daily-card clickable';
       let statusLabel = '';
-      let clickable = false;
 
-      if (st.status === 'pending') { cardClass += ' state-pending'; statusLabel = 'на проверке'; clickable = inWindow; }
-      else if (st.status === 'approved') { cardClass += ' state-approved'; statusLabel = 'принято'; clickable = true; }
-      else if (st.status === 'rejected') { cardClass += ' state-rejected'; statusLabel = 'отклонено'; clickable = inWindow; }
-      else {
-        if (inWindow) { cardClass += ' state-active'; statusLabel = 'открыто · сейчас'; clickable = true; }
-        else if (before) { cardClass += ' state-closed'; statusLabel = 'ещё не открыто'; }
-        else if (after)  { cardClass += ' state-closed'; statusLabel = 'время истекло'; }
-      }
-      if (clickable) cardClass += ' clickable';
+      if (st.status === 'pending') { cardClass += ' state-pending'; statusLabel = 'на проверке'; }
+      else if (st.status === 'approved') { cardClass += ' state-approved'; statusLabel = 'принято'; }
+      else if (st.status === 'rejected') { cardClass += ' state-rejected'; statusLabel = 'отклонено'; }
+      else { cardClass += ' state-active'; statusLabel = 'открыто'; }
 
       dailiesHTML += ''
         + '<div class="' + cardClass + '" data-daily="' + d.id + '">'
         +   '<div class="daily-head">'
         +     '<div class="daily-name">' + escapeHtml(d.name) + '</div>'
-        +     '<div class="daily-window">' + dailyWindowLabel(d) + '</div>'
         +   '</div>'
         +   '<div class="daily-req">' + escapeHtml(d.req) + '</div>'
         +   '<div class="daily-bottom">'
@@ -2122,13 +2096,10 @@
       + '<div class="team-panel">'
       +   '<div class="team-panel-title">'
       +     '<span>Команда No' + team.id.split('-')[1] + ' · день ' + day + '</span>'
-      +     '<span class="mono team-pool">общее кол-во баллов: ' + round1(personalSum) + '</span>'
       +   '</div>'
       +   '<div class="team-members">' + membersHTML + '</div>'
       +   '<h3 class="dailies-title">Командные задания</h3>'
-      +   '<p class="dailies-hint">Три командных задания, по два дня каждое (1–2, 3–4, 5–6). Отчёт один на команду — при принятии баллы получает каждый активный участник (' + activeCount + ' чел.).</p>'
       +   '<div class="dailies-list">' + dailiesHTML + '</div>'
-      +   '<p class="hint-small" style="margin-top:20px;">Общее количество баллов команды — сумма личных баллов всех участников, включая баллы за принятые дейлики.</p>'
       + '</div>';
 
     wrap.querySelectorAll('[data-daily]').forEach(card => {
@@ -2136,13 +2107,6 @@
       const daily = TEAM_DAILIES.find(x => x.id === dId);
       if (!daily) return;
       card.addEventListener('click', () => {
-        const st = getDailyState(team, dId);
-        const inWindow = isDailyInWindow(daily, day);
-        if (st.status === 'none' && !inWindow) {
-          if (day < daily.dayFrom) toast('Откроется в день ' + daily.dayFrom);
-          else toast('Время отчёта по этому заданию истекло');
-          return;
-        }
         openDailyModal(u, team, daily);
       });
     });
@@ -2176,11 +2140,7 @@
     $('#levelPoints').textContent = done + ' / ' + total;
     $('#levelFill').style.width = (total ? Math.min(100, (done / total) * 100) : 0) + '%';
 
-    if (u.frozen && !u.isAdmin) {
-      $('#taskTree').innerHTML = '<div class="frozen-notice" style="margin-top:20px;">Ты заморожен модераторами. Задания временно недоступны.</div>';
-      $('#teamPanelWrap').innerHTML = '<div class="frozen-notice">Ты заморожен модераторами.</div>';
-      renderPredictions();
-    } else if (!path) {
+    if (!path) {
       $('#taskTree').innerHTML = '<div class="stub-block">Пройди видения, чтобы открыть задания.</div>';
       renderTeamPanel(u);
       renderPredictions();
@@ -2209,14 +2169,11 @@
     }
   }
 
-  let visionStep = 0, lastLetter = null;
+  let visionStep = 0;
   let testTally = { likotvorcy: 0, ratniki: 0, kudesniki: 0 };
 
   function currentVision() {
-    const step = VISIONS[visionStep];
-    if (visionStep === 0) return { text: step.text, options: step.options };
-    const branch = step.branches[lastLetter];
-    return { text: (step.intro ? step.intro + ' ' : '') + branch.text, options: branch.options };
+    return VISIONS[visionStep];
   }
 
   function renderQuestion() {
@@ -2226,7 +2183,13 @@
     $('#questionText').textContent = vision.text;
     const wrap = $('#optionList');
     wrap.innerHTML = '';
-    vision.options.forEach(opt => {
+
+    const shuffled = vision.options
+      .map(opt => ({ opt, r: Math.random() }))
+      .sort((a, b) => a.r - b.r)
+      .map(x => x.opt);
+
+    shuffled.forEach(opt => {
       const div = document.createElement('div');
       div.className = 'option-item';
       div.textContent = opt.t;
@@ -2234,7 +2197,6 @@
       div.setAttribute('tabindex', '0');
       const choose = () => {
         testTally[opt.p]++;
-        lastLetter = opt.letter;
         visionStep++;
         if (visionStep < VISIONS.length) renderQuestion();
         else { $('#testFill').style.width = '100%'; finishTest(); }
@@ -2292,10 +2254,12 @@
 
   function bindVision() {
     $('#btnStartTest').addEventListener('click', () => {
-      visionStep = 0; lastLetter = null;
-      testTally = { likotvorcy: 0, ratniki: 0, kudesniki: 0 };
-      renderQuestion();
-      showScreen('screen-test');
+      playStory(VISION_INTRO_CARDS, () => {
+        visionStep = 0;
+        testTally = { likotvorcy: 0, ratniki: 0, kudesniki: 0 };
+        renderQuestion();
+        showScreen('screen-test');
+      });
     });
     $('#storyCard').addEventListener('click', () => {
       storyIndex++;
@@ -2361,6 +2325,32 @@
     $('#taskModalBackdrop').addEventListener('click', e => {
       if (e.target.id === 'taskModalBackdrop') closeTaskModal();
     });
+
+    document.addEventListener('click', e => {
+      const backdrop = document.getElementById('reportModalBackdrop');
+      if (!backdrop || !backdrop.classList.contains('open')) return;
+
+      if (e.target.closest('#reportModalCloseBtn')) {
+        closeReportModal();
+        return;
+      }
+      if (e.target.id === 'reportModalBackdrop') {
+        closeReportModal();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const reportBd = document.getElementById('reportModalBackdrop');
+      if (reportBd && reportBd.classList.contains('open')) {
+        closeReportModal();
+        return;
+      }
+      const rejectBd = document.getElementById('rejectBackdrop');
+      if (rejectBd && rejectBd.classList.contains('open')) {
+        closeRejectModal();
+      }
+    });
   }
 
   function openImageViewer(src) {
@@ -2416,7 +2406,7 @@
         users[row.id] = {
           id: row.id, name: row.name, path: row.path,
           teamId: row.team_id, isAdmin: !!row.is_admin,
-          frozen: !!row.frozen, approved: !!row.approved,
+          approved: !!row.approved,
           pinHash: row.pin_hash || null
         };
         const u = currentUser();
