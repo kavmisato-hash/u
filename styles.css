@@ -1594,3 +1594,27 @@ input[type=file].visually-hidden { position: absolute; width: 1px; height: 1px; 
   .task-node-orb.state-approved,
   .task-node-card.state-approved { animation: none !important; }
 }
+
+.admin-entry {
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .15s;
+}
+.admin-entry:hover {
+  border-color: var(--gold-soft);
+  background: var(--bg-panel-2);
+}
+.admin-entry:active { transform: scale(.995); }
+
+.report-meta {
+  font-family: 'PT Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .04em;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.report-meta .rm-label { color: var(--moss); }
