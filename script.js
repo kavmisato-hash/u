@@ -4,7 +4,8 @@
   const sb = window.sb;
   const BUFF_MULT = 1.2;
   const TEAM_SIZE = 4;
-  const ADMIN_CODE = '1707227';
+  const ADMIN_CODES = ['1707227', '1634921'];
+  const ADMIN_CODE = ADMIN_CODES[0];
   const MAX_SHUFFLES = 3;
   const BUCKET = 'reports';
 
@@ -239,7 +240,8 @@
     teams = Object.fromEntries((tRes.data || []).map(r => [r.id, {
       id: r.id, size: r.size || TEAM_SIZE,
       members: Array.isArray(r.members) ? r.members.slice() : [],
-      dailies: r.dailies || {}
+      dailies: r.dailies || {},
+      path: r.path || null
     }]));
 
     regOrder = (rRes.data || []).map(r => r.user_id);
@@ -300,25 +302,13 @@
     if (error) console.error('upsertUser', error);
   }
 
-  async function upsertUsersBulk(list) {
-    if (!list.length) return;
-    const { error } = await sb.from('users').upsert(list.map(u => ({
-      id: u.id, name: u.name, path: u.path,
-      team_id: u.teamId || null,
-      is_admin: !!u.isAdmin,
-      frozen: false,
-      approved: u.approved !== false,
-      pin_hash: u.pinHash || null
-    })));
-    if (error) console.error('upsertUsersBulk', error);
-  }
-
   async function upsertTeam(team) {
     teams[team.id] = team;
     const { error } = await sb.from('teams').upsert({
       id: team.id, size: team.size,
       members: team.members || [],
-      dailies: team.dailies || {}
+      dailies: team.dailies || {},
+      path: team.path || null
     });
     if (error) console.error('upsertTeam', error);
   }
@@ -374,7 +364,14 @@
   async function autoPlaceInTeam(uid) {
     const user = users[uid];
     if (!user || !user.approved) return;
-    let target = Object.values(teams).find(t => t.members.length < TEAM_SIZE);
+    if (!user.path) return;
+
+    let target = null;
+    for (const t of Object.values(teams)) {
+      if (t.members.length >= TEAM_SIZE) continue;
+      if (t.path === user.path) { target = t; break; }
+    }
+
     if (target) {
       if (target.members.indexOf(uid) === -1) {
         target.members.push(uid);
@@ -389,7 +386,10 @@
         if (n > maxIdx) maxIdx = n;
       });
       const newId = 'team-' + (maxIdx + 1);
-      const newTeam = { id: newId, size: TEAM_SIZE, members: [uid], dailies: {} };
+      const newTeam = {
+        id: newId, size: TEAM_SIZE, members: [uid],
+        dailies: {}, path: user.path
+      };
       user.teamId = newId;
       await upsertTeam(newTeam);
       await upsertUser(user);
@@ -480,8 +480,12 @@
     Object.keys(depthCache).forEach(k => delete depthCache[k]);
   }
 
+  // Контекст дерева под конкретного игрока (стартовое задание как корень).
   let TREE_CTX = null;
 
+  // Стартовое задание — всегда из лёгких (level 0), всегда из той сферы,
+  // что даёт бафф пути. Внутри пула выбирается детерминированно по
+  // команде+сфере.
   function starterTaskFor(u) {
     if (!u || !u.path) return null;
     const path = PATHS[u.path];
@@ -622,10 +626,10 @@
     const idInput = $('#inputId');
     const hint = $('#adminCodeHint');
     if (idInput && hint) {
-      idInput.addEventListener('input', () => {
-        if (idInput.value.trim() === ADMIN_CODE) hint.classList.add('show');
+    idInput.addEventListener('input', () => {
+      if (ADMIN_CODES.includes(idInput.value.trim())) hint.classList.add('show');
         else hint.classList.remove('show');
-      });
+    });
     }
 
     $('#btnStartAuth').addEventListener('click', async () => {
@@ -634,8 +638,7 @@
       const id = $('#inputId').value.trim();
       const pin = $('#inputPin').value.trim();
       const err = $('#authErr');
-      const isAdminCode = (id === ADMIN_CODE);
-
+      const isAdminCode = ADMIN_CODES.includes(id);
       const fail = (msg) => {
         err.textContent = msg;
         err.classList.add('show');
@@ -734,10 +737,11 @@
     const byDepth = {};
     let activeDepth = 0;
 
+    // Считаем глубину по ВСЕМ заданиям, включая скрытые принятые.
+    // Иначе при скрытии принятых пропадают их «дети» — отправленные и новые.
     order.forEach(id => {
       const t = ALL_TASKS.find(x => x.id === id);
       if (!t) return;
-      if (!showCompleted && getTaskState(u, t).status === 'approved') return;
       const d = taskDepth(id);
       if (isTaskUnlockedByDeps(u, t) || getTaskState(u, t).status !== 'none') {
         activeDepth = Math.max(activeDepth, d);
@@ -1276,7 +1280,7 @@
       + '<div class="modal-eyebrow">командное задание · ' + activeCount + ' уч.</div>'
       + '<h3 class="display modal-title">' + escapeHtml(daily.name) + '</h3></div></div>'
       + '<p class="lore-text muted modal-req">' + escapeHtml(daily.req) + '</p>'
-      + '<div class="modal-points">баллы каждому участнику: ' + daily.pts + ' · мяу</div>'
+      + '<div class="modal-points">баллы каждому участнику: ' + daily.pts + ' · отчёт один на команду</div>'
       + statusArea;
 
     attachImageZoom($('#taskModalBody'));
@@ -1771,7 +1775,7 @@
       return;
     }
 
-    const freeUsers = Object.values(users).filter(u => !u.isAdmin && !u.teamId && u.approved);
+    const freeUsers = Object.values(users).filter(u => !u.teamId && u.approved);
 
     teamIds.forEach(tid => {
       const team = teams[tid];
@@ -1816,9 +1820,11 @@
         '<option value="' + escapeHtml(fu.id) + '">' + escapeHtml(fu.name) + ' (' + escapeHtml(fu.id) + ')</option>'
       ).join('');
 
+      const pathLabel = team.path && PATHS[team.path] ? ' · ' + PATHS[team.path].name : '';
+
       block.innerHTML = ''
         + '<div class="team-editor-head">'
-        +   '<div class="team-editor-title">Команда No' + tid.split('-')[1] + '</div>'
+        +   '<div class="team-editor-title">Команда No' + tid.split('-')[1] + pathLabel + '</div>'
         +   '<div class="team-editor-count">' + team.members.length + ' / ' + team.size + ' участников</div>'
         + '</div>'
         + '<div>' + membersHTML + '</div>'
@@ -1905,37 +1911,6 @@
 
     toast('Удалён');
     renderModResponsibles();
-    renderModTeams();
-    renderDashboard();
-  }
-
-  async function compactTeams() {
-    if (!confirm('Пересобрать команды заново? Прогресс по командным дейликам сбросится.')) return;
-
-    const active = regOrder.filter(uid =>
-      users[uid] && users[uid].approved
-    );
-
-    for (const tid of Object.keys(teams)) {
-      await sb.from('teams').delete().eq('id', tid);
-    }
-    teams = {};
-
-    for (let i = 0; i < active.length; i += TEAM_SIZE) {
-      const idx = Math.floor(i / TEAM_SIZE) + 1;
-      const id = 'team-' + idx;
-      const chunk = active.slice(i, i + TEAM_SIZE);
-      teams[id] = { id, size: TEAM_SIZE, members: chunk.slice(), dailies: {} };
-      chunk.forEach(mid => { users[mid].teamId = id; });
-      await upsertTeam(teams[id]);
-    }
-
-    Object.keys(users).forEach(uid => {
-      if (!active.includes(uid)) users[uid].teamId = null;
-    });
-    await upsertUsersBulk(Object.values(users));
-
-    toast('Команды пересобраны');
     renderModTeams();
     renderDashboard();
   }
@@ -2092,10 +2067,13 @@
         + '</div>';
     });
 
+    const teamPath = team.path ? PATHS[team.path] : null;
+    const teamPathLabel = teamPath ? ' · ' + teamPath.name : '';
+
     wrap.innerHTML = ''
       + '<div class="team-panel">'
       +   '<div class="team-panel-title">'
-      +     '<span>Команда No' + team.id.split('-')[1] + ' · день ' + day + '</span>'
+      +     '<span>Команда No' + team.id.split('-')[1] + teamPathLabel + ' · день ' + day + '</span>'
       +   '</div>'
       +   '<div class="team-members">' + membersHTML + '</div>'
       +   '<h3 class="dailies-title">Командные задания</h3>'
@@ -2235,6 +2213,7 @@
     const u = currentUser();
     u.path = best;
     await upsertUser(u);
+    await autoPlaceInTeam(u.id);
     const fullStory = WAKE_STORY.concat(ITOG_INTRO_STORY)
       .concat([{ eyebrow: 'Кем ты стал', text: PATH_RESULTS[best] }]);
     playStory(fullStory, () => goToResultScreen());
@@ -2431,7 +2410,8 @@
         teams[row.id] = {
           id: row.id, size: row.size || TEAM_SIZE,
           members: Array.isArray(row.members) ? row.members.slice() : [],
-          dailies: row.dailies || {}
+          dailies: row.dailies || {},
+          path: row.path || null
         };
         const u = currentUser();
         if (u && $('#screen-dashboard').classList.contains('active')) {
@@ -2510,7 +2490,7 @@
       const u = users[session.userId];
       $('#inputName').value = u.name;
       $('#inputId').value = u.id;
-      if (u.id === ADMIN_CODE) $('#adminCodeHint').classList.add('show');
+      if (ADMIN_CODES.includes(u.id)) $('#adminCodeHint').classList.add('show');
       routeAfterLogin();
     } else {
       showScreen('screen-auth');
