@@ -1070,6 +1070,7 @@
 
   function renderModalContent(u, task) {
     if (task.type === 'riddle') { renderRiddleModal(u, task); return; }
+    if (task.type === 'maze')   { renderMazeModal(u, task);   return; }
     const state = getTaskState(u, task);
     const sphere = SPHERES[task.sphere];
     const finalPts = computeFinalPts(u, task);
@@ -1241,6 +1242,68 @@
     if (first) setTimeout(() => first.focus(), 80);
   }
 
+    function renderMazeModal(u, task) {
+    const state = getTaskState(u, task);
+    const sphere = SPHERES[task.sphere];
+    const finalPts = computeFinalPts(u, task);
+
+    // Уже решено
+    if (state.status === 'approved') {
+      $('#taskModalBody').innerHTML = ''
+        + '<div class="modal-head"><div class="modal-icon">' + sphere.icon + '</div><div>'
+        + '<div class="modal-eyebrow">' + sphere.name + '</div>'
+        + '<h3 class="display modal-title">' + escapeHtml(task.name) + '</h3></div></div>'
+        + '<div class="riddle-solved-note">'
+        +   '<div class="big">Путь пройден</div>'
+        +   '<div class="small">Ты вывел линию сквозь туман и получил <b>' + finalPts + '</b> баллов.</div>'
+        + '</div>';
+      return;
+    }
+
+    if (state.status === 'pending') {
+      $('#taskModalBody').innerHTML = ''
+        + '<div class="modal-head"><div class="modal-icon">' + sphere.icon + '</div><div>'
+        + '<div class="modal-eyebrow">' + sphere.name + '</div>'
+        + '<h3 class="display modal-title">' + escapeHtml(task.name) + '</h3></div></div>'
+        + '<p class="status-note pending">Туман проверяет твой путь...</p>'
+        + '<button class="btn btn-ghost" id="btnWithdraw">Отменить и внести правки</button>';
+      const w = $('#btnWithdraw');
+      if (w) w.addEventListener('click', () => handleWithdraw(u, task));
+      return;
+    }
+
+    $('#taskModalBody').innerHTML = ''
+      + '<div class="modal-head"><div class="modal-icon">' + sphere.icon + '</div><div>'
+      + '<div class="modal-eyebrow">' + sphere.name + ' · ' + task.pts + ' баллов</div>'
+      + '<h3 class="display modal-title">' + escapeHtml(task.name) + '</h3></div></div>'
+      + '<p class="lore-text muted modal-req">' + escapeHtml(task.req) + '</p>'
+      + '<div id="mazeHost"></div>';
+
+    const host = $('#mazeHost');
+    if (!host || !window.MazeTask) {
+      host.innerHTML = '<div class="empty-hint">Лабиринт не загрузился — проверь, что labirint.js подключён до script.js.</div>';
+      return;
+    }
+
+    const seedBase = hashStr('maze::' + u.id + '::' + task.id);
+
+    window.MazeTask.open(host, seedBase, async () => {
+      await saveTaskState(u.id, task.id, {
+        status: 'approved',
+        answer: 'Путь сквозь туман пройден.',
+        image: null, reason: null,
+        submittedBy: u.name,
+        submittedAt: Date.now(),
+        decidedAt: Date.now()
+      });
+      toast('Туман принял твой путь');
+      setTimeout(() => {
+        closeTaskModal();
+        renderDashboard();
+      }, 800);
+    });
+  }
+
   function renderDailyModalContent(u, team, daily) {
     const state = getDailyState(team, daily.id);
     const activeCount = team.members.length;
@@ -1309,8 +1372,8 @@
     currentModalTask = task;
     currentModalDaily = null;
     currentModalTeam = null;
-    renderModalContent(u, task);
     $('#taskModalBackdrop').classList.add('open');
+    renderModalContent(u, task);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeTaskModal(); }, { once: true });
   }
 
