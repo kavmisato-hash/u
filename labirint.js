@@ -269,7 +269,7 @@
         <div class="stage" id="mzStage">
           <canvas id="mzCanvas"></canvas>
         </div>
-        <div class="mz-status" id="mzStatus">Коснись золотой точки и веди палец.</div>
+        <div class="mz-status" id="mzStatus">Коснись золотой точки.</div>
       </div>
     `;
 
@@ -939,7 +939,7 @@
         lastPoint = [x, y];
         e.preventDefault();
         statusEl.className = 'mz-status';
-        statusEl.textContent = 'Веди палец, не отпуская...';
+        statusEl.textContent = 'Не отпускай...';
         draw();
         updateHud();
       } else if (!gameOver) {
@@ -973,7 +973,7 @@
       if (!won && !gameOver && trail.length > 1) {
         gameOver = true;
         statusEl.className = 'mz-status bad';
-        statusEl.textContent = '✗ Палец оторвался — след оборвался. Начни сначала.';
+        statusEl.textContent = '✗ След оборвался. Начни сначала.';
         trail = [[startCell[0], startCell[1]]];
         visited = new Set([key(startCell[0], startCell[1])]);
         collected = new Set();
