@@ -34,13 +34,11 @@
       <div class="field">
         <label>ID персонажа</label>
         <input type="text" id="inputId" placeholder=" ">
-        <p class="field-hint">Вышел? Заходи с тем же именем и ID</p>
-        <p class="admin-code-hint" id="adminCodeHint">С этим ID откроется вкладка «Модерация»</p>
+        <p class="admin-code-hint" id="adminCodeHint">Доступ к добавлению участников + проверка отчётов.</p>
       </div>
       <div class="field">
         <label>Пароль</label>
         <input type="password" id="inputPin" placeholder=" " autocomplete="new-password">
-        <p class="field-hint">Придумай при первом входе. Потом — тот же самый.</p>
         <p class="err-text" id="authErr">Проверь имя, ID и пароль.</p>
       </div>
       <button class="btn btn-primary" id="btnStartAuth">Проснуться?</button>
@@ -51,10 +49,10 @@
 <section class="screen" id="screen-pending">
   <div class="mist-wrap">
     <div class="auth-card snug">
-      <p class="eyebrow">Туман ждёт решения хранителей</p>
+      <p class="eyebrow">Туман ждёт решения ответственных</p>
       <h2 class="display screen-title" id="pendingName">—</h2>
-      <p class="lore-text">Твоя заявка отправлена хранителям тумана. Как только они подтвердят вход — ты сможешь пройти видения.</p>
-      <p class="lore-text muted">Эта страница обновится сама. Если долго нет ответа — нажми «Проверить снова».</p>
+      <p class="lore-text">Твоя заявка отправлена ответственным. Как только они подтвердят вход — ты сможешь пройти видения.</p>
+      <p class="lore-text">Можно тыкнуть <a href="https://vk.ru/mirotvorkaa" target="_blank" rel="noopener">Тенька [1707227]</a> если хочешь, чтобы быстрее подтвердили.</p>
       <div class="btn-row">
         <button class="btn btn-ghost" id="btnPendingRefresh">Проверить снова</button>
       </div>
@@ -67,9 +65,9 @@
     <div class="auth-card snug">
       <p class="eyebrow">Видение тумана</p>
       <h2 class="display screen-title" id="greetName">Туман знает твоё имя</h2>
-      <p class="lore-text">Пройди через пять видений — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong> или хитрый <strong>Кудесник</strong>.</p>
+      <p class="lore-text">Пройди через четыре видения — туман сам решит, кто ты: осторожный <strong>Ликотворец</strong>, бесстрашный <strong>Ратник</strong> или хитрый <strong>Кудесник</strong>.</p>
       <div class="btn-row">
-        <button class="btn btn-primary" id="btnStartTest">Войти в видения</button>
+        <button class="btn btn-primary" id="btnStartTest">Пройти</button>
       </div>
     </div>
   </div>
@@ -79,7 +77,7 @@
   <div class="mist-wrap">
     <div class="auth-card medium">
       <div class="test-progress">
-        <div class="test-progress-label"><span>Видение</span><span class="mono" id="testStep">1 / 5</span></div>
+        <div class="test-progress-label"><span>Видение</span><span class="mono" id="testStep">1 / 4</span></div>
         <div class="river-track"><div class="river-fill" id="testFill"></div></div>
       </div>
       <h3 class="display question-text" id="questionText">—</h3>
@@ -149,24 +147,24 @@
         </div>
         <div class="stat-block">
           <div class="stat-num mono" id="personalScore">0</div>
-          <div class="stat-label">личных баллов</div>
+          <div class="stat-label">баллы</div>
         </div>
       </div>
     </div>
   </header>
   <div class="view-tabs">
     <button class="view-tab active" data-tab="tasks">Задания</button>
-    <button class="view-tab" data-tab="predictions">Предсказания</button>
     <button class="view-tab" data-tab="team">Команда</button>
+    <button class="view-tab" data-tab="predictions">Предсказания</button>
     <button class="view-tab" data-tab="rewards">Награды</button>
-    <button class="view-tab" data-tab="mod" id="modTabBtn" style="display:none;">Модерация</button>
+    <button class="view-tab" data-tab="mod" id="modTabBtn" style="display:none;">Ответственные</button>
   </div>
   <main class="dash-main">
     <div class="tabview active" id="tabview-tasks">
       <div class="tasks-toolbar">
         <div class="state-legend">
           <span class="st-none"><i></i>не начато</span>
-          <span class="st-pending"><i></i>отправлен отчёт</span>
+          <span class="st-pending"><i></i>отправлено</span>
           <span class="st-approved"><i></i>принято</span>
         </div>
         <button class="btn-toggle-done" id="btnToggleDone" data-state="shown">
@@ -192,7 +190,6 @@
         <button class="mod-subtab" data-modtab="responsibles">Участники</button>
       </div>
       <div class="mod-panel active" id="modpanel-reports">
-        <p class="lore-text muted" style="margin-bottom:18px;">Все отчёты, отправленные в туман. Прими или отклони их — при отклонении можно оставить причину.</p>
         <div class="admin-filter-row" id="adminFilterRow">
           <button class="admin-filter-btn active" data-filter="pending">На проверке</button>
           <button class="admin-filter-btn" data-filter="approved">Принятые</button>
@@ -214,6 +211,13 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="reportModalBackdrop">
+  <div class="task-modal" id="reportModal">
+    <button class="modal-close" id="reportModalCloseBtn">✕</button>
+    <div id="reportModalBody"></div>
+  </div>
+</div>
+
 <div class="image-viewer" id="imageViewer">
   <button class="image-viewer-close" id="imageViewerClose">✕</button>
   <img id="imageViewerImg" src="" alt="">
@@ -225,7 +229,7 @@
     <div class="modal-head">
       <div class="modal-icon" style="color: var(--err); border-color: var(--err);">✕</div>
       <div>
-        <div class="modal-eyebrow">модерация</div>
+        <div class="modal-eyebrow">ответственные</div>
         <h3 class="display modal-title" style="color: var(--err);">Отклонить отчёт</h3>
       </div>
     </div>
@@ -233,7 +237,6 @@
     <div class="field">
       <label>Причина отклонения</label>
       <textarea id="rejectReasonInput" rows="3" placeholder="Уточни отчёт и отправь снова."></textarea>
-      <p class="field-hint">Можно оставить пустым — подставится стандартная причина.</p>
     </div>
     <div class="reject-actions">
       <button class="btn btn-ghost" id="rejectCancelBtn">Отмена</button>
